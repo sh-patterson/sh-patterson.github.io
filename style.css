@@ -1,0 +1,255 @@
+/* RESET & GLOBAL FONT */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: 'Lora', serif;    /* serif applied site-wide */
+}
+
+/* CSS VARIABLES */
+:root {
+  --lt: clamp(6px,1.4vw,12px); /* Line Thickness */
+  --red: #C0392B;              /* Primary Red */
+  --ry: #F1C40F;               /* Primary Yellow */
+  --ln: #2C3E50;               /* Line Navy / Dark Text */
+  --b1: #D4E6F1;               /* Light Blue 1 (Tertiary) */
+  --b2: #A9CCE3;               /* Light Blue 2 (Secondary) */
+  --b3: #85C1E9;               /* Light Blue 3 (Primary Light Blue) */
+  --b4: #BBDDF0;               /* Light Blue 4 (Quaternary) */
+  --white: #ECF0F1;            /* Neutral White / Off-white icons on dark */
+  --txt-red: #FDFEFE;          /* Text on Red */
+}
+
+/* MONDRIAN GRID */
+.mondrian-canvas {
+  display: grid;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  grid-template-columns: 0.5fr var(--lt) 1.2fr var(--lt) 1fr;
+  grid-template-rows: 0.7fr var(--lt) 1.3fr var(--lt) 0.8fr var(--lt) 1fr;
+}
+
+/* BLOCKS */
+.block { z-index: 1; }
+.block-1 { background: var(--b1); grid-area: 1/1/2/2; }
+.block-2 { background: var(--b2); grid-area: 1/3/2/4; }
+.block-3 { background: var(--ry); grid-area: 1/5/3/6; } /* Yellow for Name */
+.block-4 { background: var(--ln); grid-area: 3/1/4/2; } /* Dark Block */
+.block-5 { background: var(--red); grid-area: 3/3/6/4; z-index: 3; } /* Red for About Me */
+.block-6 { background: var(--ry); grid-area: 5/1/8/2; } /* Yellow Strip */
+.block-8 { background: var(--b3); grid-area: 3/5/6/6; } /* Light Blue next to About */
+.block-9 { background: var(--b4); grid-area: 7/3/8/4; } /* Light Blue Bottom Mid */
+.block-10{ background: var(--ln); grid-area: 7/5/8/6; } /* Dark Blue for Social */
+
+/* GRID LINES */
+.line {
+  background: var(--ln);
+  z-index: 2;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.line.pulse {
+  background-color: #555 !important;
+}
+.line.h-line-1.pulse, .line.h-line-2.pulse, .line.h-line-3.pulse {
+  transform: scaleY(1.2);
+}
+.line.v-line-1.pulse, .line.v-line-2.pulse {
+  transform: scaleX(1.2);
+}
+
+.h-line-1 { grid-area: 2/1/3/6; }
+.h-line-2 { grid-area: 4/1/5/6; }
+.h-line-3 { grid-area: 6/1/7/6; }
+.v-line-1 { grid-area: 1/2/8/3; }
+.v-line-2 { grid-area: 1/4/8/5; }
+
+/* CONTENT OVERLAY BASE */
+.content-overlay {
+  position: relative;
+  z-index: 10;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* NAME AREA - MODIFIED CSS */
+.name-area {
+  grid-area: 1/5/3/6; /* Corresponds to block-3 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--ln); /* Dark text on yellow */
+  padding: clamp(15px, 2.5vw, 30px);
+}
+
+/* Apply overall font styles to the h1 wrapper if needed */
+.name-area .your-name {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2; 
+}
+
+/* wrap text + cursor, prevent wrapping, and align */
+.typing-wrapper {
+  display: inline-flex;
+  align-items: baseline; 
+  white-space: nowrap;  
+}
+
+/* style the typed text */
+#typed-text {
+  font-size: clamp(24px,4vw,50px);
+  line-height: 1.2;
+  margin: 0; /* Remove any default span margin */
+}
+
+/* our static cursor */
+.static-cursor {
+  font-size: inherit;       
+  line-height: inherit;     
+  color: var(--ln);         
+  margin-left: 0.1ch;       
+  animation: blink-step 1s steps(2) infinite;
+  
+}
+
+/* blink keyframes */
+@keyframes blink-step {
+  0%, 50%    { opacity: 1 }
+  50.01%,100%{ opacity: 0 }
+}
+
+.subheader {
+  margin: clamp(8px, 1.5vh, 15px) 0 0 0;
+  font-size: clamp(16px,2.5vw,28px);
+  line-height: 1.2;
+  /* Inherits color from .name-area */
+}
+
+/* ABOUT AREA */
+.about-me-area {
+  grid-area: 3/3/6/4; /* Corresponds to block-5 */
+  color: var(--txt-red);
+  padding: clamp(25px,4vw,50px);
+  justify-content: flex-start;
+  align-items: center;
+}
+.about-me {
+  max-width: 65ch;
+  margin: 0 0 1em;
+  font-size: clamp(14px,1.9vw,19px);
+  line-height: 1.65;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity .6s ease-out, transform .6s ease-out;
+}
+.about-me:last-of-type {
+  margin-bottom: 0;
+}
+.about-me.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* DICE CTA */
+.dice-cta {
+  color: var(--txt-red);
+  text-decoration: underline;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+.dice-cta .die {
+  margin-left: 0.4ch;
+  font-size: 1em;
+  opacity: 0;
+  transform: rotate3d(1,1,0,0deg);
+  transition: opacity .2s ease-in-out;
+}
+.dice-cta:hover .die {
+  opacity: 1;
+  animation: roll-d20 .8s ease-in-out forwards;
+}
+@keyframes roll-d20 {
+  to { transform: rotate3d(1,1,0,360deg); }
+}
+
+/* SOCIAL LINKS */
+.social-links-area {
+  grid-area: 7/5/8/6; /* Corresponds to block-10 */
+  padding: clamp(15px,2vw,25px);
+  text-align: center;
+  color: var(--white);
+  justify-content: center;
+  align-items: center;
+}
+.social-links-area h3 {
+  margin: 0 0 .75em;
+  font-size: clamp(18px, 2.2vw, 24px);
+}
+.social-links-area ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.social-links-area li {
+  margin-bottom: .75em;
+}
+.social-links-area li:last-of-type {
+  margin-bottom: 0;
+}
+.social-links-area a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--white);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: clamp(14px, 1.8vw, 20px);
+  transition: color .2s ease;
+}
+.social-links-area a i {
+  margin-right: .6ch;
+  font-size: 1.2em;
+  line-height: 1;
+}
+.social-links-area a:hover {
+  text-decoration: underline;
+  color: var(--ry);
+}
+
+/* RESPONSIVE STACK */
+@media (max-width:850px) {
+  html, body { overflow-y: auto; }
+  .mondrian-canvas {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+  }
+  .block, .line, .content-overlay {
+    grid-column: 1/2 !important;
+    grid-row: auto !important;
+  }
+  .block, .line { display: none; }
+
+  .content-overlay {
+    padding: 25px 20px;
+  }
+  .name-area { order: 1; background: var(--ry); }
+  .about-me-area { order: 2; background: var(--red); }
+  .social-links-area { order: 3; background: var(--ln); }
+
+  /* Ensure #typed-text scales correctly on mobile */
+  #typed-text { font-size: clamp(24px, 7vw, 40px); }
+  .name-area .your-name { font-size: 1em; }
+
+
+  .subheader { font-size: clamp(16px, 4.5vw, 24px); }
+  .about-me { font-size: clamp(15px, 4vw, 18px); max-width: 90%; margin-bottom: 1.5em; }
+  .social-links-area h3 { font-size: clamp(18px, 5vw, 22px); }
+  .social-links-area a { font-size: clamp(15px, 4vw, 18px); }
+}

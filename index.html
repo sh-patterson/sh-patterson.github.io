@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shawn Patterson — Portfolio</title>
+
+  <!-- Serif font (Lora) for the entire site -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Font Awesome for the D20 & social icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  />
+
+  <!-- Typed.js -->
+  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+
+  <!-- Your custom styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="mondrian-canvas">
+    <!-- Colored Blocks -->
+    <div class="block block-1"></div>
+    <div class="block block-2"></div>
+    <div class="block block-3"></div>
+    <div class="block block-4"></div>
+    <div class="block block-5"></div>
+    <div class="block block-6"></div>
+    <div class="block block-8"></div>
+    <div class="block block-9"></div>
+    <div class="block block-10"></div>
+
+    <!-- Grid Lines -->
+    <div class="line h-line-1"></div>
+    <div class="line h-line-2"></div>
+    <div class="line h-line-3"></div>
+    <div class="line v-line-1"></div>
+    <div class="line v-line-2"></div>
+
+    <!-- Name / Typed Header - MODIFIED HTML STRUCTURE -->
+    <section class="content-overlay name-area" aria-label="Introduction and Title">
+      <h1 class="your-name"> 
+        <span class="typing-wrapper">
+          <span id="typed-text"></span><span class="static-cursor">|</span>
+        </span>
+      </h1>
+      <h2 class="subheader">opposition researcher // ai enthusiast</h2>
+    </section>
+
+
+    <!-- About Me -->
+    <section class="content-overlay about-me-area" aria-label="About Shawn Patterson">
+      <p class="about-me">
+        I’m a mission-driven investigator, strategist, and innovator who finds victory in the jaws of defeat. From West Virginia to Mississippi to Arizona, I’ve made history winning campaigns the institutions had already written off.
+      </p>
+      <p class="about-me">
+        Right now, I’m fusing AI innovation with investigative workflows to make political research faster, sharper, and free from outdated methods.
+      </p>
+      <p class="about-me">
+        You’ll find me with Braque in a local gallery, in the front row at a Converge show, or rolling 20-sided dice with friends. I grew up in Buffalo mud, now I’m kicking around DC dirt.
+      </p>
+      <p class="about-me">
+        Curious about the future of opposition research, campaign tech, or what it takes to win against the odds? Let’s
+        <a href="mailto:shawnpatterson727@gmail.com" class="dice-cta">
+          connect <i class="fas fa-dice-d20 die"></i>
+        </a>.
+      </p>
+    </section>
+
+    <!-- Social Links -->
+    <section class="content-overlay social-links-area" aria-label="Contact and Social Media Links">
+      <h3>Connect</h3>
+      <ul>
+        <li>
+          <a href="https://github.com/sh-patterson" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-github"></i> GitHub
+          </a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/in/shawn-patterson-573b98361/" target="_blank" rel="noopener noreferrer">
+            <i class="fab fa-linkedin"></i> LinkedIn
+          </a>
+        </li>
+        <li>
+            <a href="mailto:shawnpatterson727@gmail.com">
+                <i class="fas fa-envelope"></i> Email Me
+            </a>
+        </li>
+      </ul>
+    </section>
+  </div> <!-- End of .mondrian-canvas -->
+
+  <!-- IMPORTANT: JavaScript initializations -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Typed.js for name - MODIFIED TARGET AND OPTIONS
+      if (document.getElementById('typed-text')) { 
+        new Typed('#typed-text', { 
+          strings: ['shawn patterson'],
+          typeSpeed: 80,
+          backSpeed: 0,
+          showCursor: false,  
+          loop: false         
+        });
+      }
+
+      // Intersection Observer for "About Me" paragraphs fade-in
+      const aboutMeElements = document.querySelectorAll('.about-me-area .about-me');
+      if (aboutMeElements.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+
+        aboutMeElements.forEach(p => observer.observe(p));
+      }
+    });
+
+    // Grid-Line Pulse on Scroll (outside DOMContentLoaded for window event)
+    const lines = document.querySelectorAll('.mondrian-canvas .line'); 
+    if (lines.length > 0) {
+        let pulseTimeout;
+        window.addEventListener('scroll', () => {
+            lines.forEach(line => line.classList.add('pulse'));
+            clearTimeout(pulseTimeout);
+            pulseTimeout = setTimeout(() => {
+                lines.forEach(line => line.classList.remove('pulse'));
+            }, 200);
+        });
+    }
+  </script>
+</body>
+</html>
