@@ -1,143 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Shawn Patterson — Portfolio</title>
-
-  <!-- Serif font (Lora) for the entire site -->
-  <link
-    href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- Font Awesome for the D20 & social icons -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-  />
-
-  <!-- Typed.js -->
-  <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
-
-  <!-- Your custom styles -->
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shawn Patterson // Impermanence</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="mondrian-canvas">
-    <!-- Colored Blocks -->
-    <div class="block block-1"></div>
-    <div class="block block-2"></div>
-    <div class="block block-3"></div>
-    <div class="block block-4"></div>
-    <div class="block block-5"></div>
-    <div class="block block-6"></div>
-    <div class="block block-8"></div>
-    <div class="block block-9"></div>
-    <div class="block block-10"></div>
 
-    <!-- Grid Lines -->
-    <div class="line h-line-1"></div>
-    <div class="line h-line-2"></div>
-    <div class="line h-line-3"></div>
-    <div class="line v-line-1"></div>
-    <div class="line v-line-2"></div>
+    <div id="canvas-container">
+        <canvas id="sand-canvas"></canvas>
+    </div>
 
-    <!-- Name / Typed Header - MODIFIED HTML STRUCTURE -->
-    <section class="content-overlay name-area" aria-label="Introduction and Title">
-      <h1 class="your-name"> 
-        <span class="typing-wrapper">
-          <span id="typed-text"></span><span class="static-cursor">|</span>
-        </span>
-      </h1>
-      <h2 class="subheader">opposition researcher // ai enthusiast</h2>
-    </section>
+    <div class="content-wrapper">
+        
+        <!-- SCENE 1: THE MANDALA -->
+        <section class="hero-section">
+            <div class="hero-text-block">
+                <h1>SHAWN<br>PATTERSON</h1>
+                <div class="subtitle">Opposition Researcher // AI Enthusiast</div>
+            </div>
+            <div class="scroll-indicator">SCROLL TO DISSOLVE</div>
+        </section>
 
+        <!-- SCENE 2: THE GALAXY (BIO) -->
+        <section class="bio-section">
+            <div class="glass-panel">
+                <h2>Impermanence &amp; Insight</h2>
+                <p>
+                    I’m a mission-driven investigator, strategist, and innovator who finds <span class="highlight">victory in the jaws of defeat</span>. Like the sand mandala, political landscapes are constantly shifting; I find the patterns in the chaos.
+                </p>
+                <p>
+                    From West Virginia to Mississippi to Arizona, I’ve made history winning campaigns the institutions had already written off. Right now, I’m fusing <span class="highlight">AI innovation</span> with investigative workflows to make research faster, sharper, and free from outdated methods.
+                </p>
+                <p>
+                    You’ll find me with Braque in a local gallery, in the front row at a Converge show, or rolling 20-sided dice with friends. I grew up in Buffalo mud, now I’m kicking around DC dirt.
+                </p>
 
-    <!-- About Me -->
-    <section class="content-overlay about-me-area" aria-label="About Shawn Patterson">
-      <p class="about-me">
-        I’m a mission-driven investigator, strategist, and innovator who finds victory in the jaws of defeat. From West Virginia to Mississippi to Arizona, I’ve made history winning campaigns the institutions had already written off.
-      </p>
-      <p class="about-me">
-        Right now, I’m fusing AI innovation with investigative workflows to make political research faster, sharper, and free from outdated methods.
-      </p>
-      <p class="about-me">
-        You’ll find me with Braque in a local gallery, in the front row at a Converge show, or rolling 20-sided dice with friends. I grew up in Buffalo mud, now I’m kicking around DC dirt.
-      </p>
-      <p class="about-me">
-        Curious about the future of opposition research, campaign tech, or what it takes to win against the odds? Let’s
-        <a href="mailto:shawnpatterson727@gmail.com" class="dice-cta">
-          connect <i class="fas fa-dice-d20 die"></i>
-        </a>.
-      </p>
-    </section>
+                <div class="links-row">
+                    <a href="mailto:shawnpatterson727@gmail.com" class="link-item">
+                        <i class="fas fa-envelope"></i> Email
+                    </a>
+                    <a href="https://github.com/sh-patterson" class="link-item">
+                        <i class="fab fa-github"></i> GitHub
+                    </a>
+                    <a href="https://www.linkedin.com/in/shawn-patterson-573b98361/" class="link-item">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+        </section>
 
-    <!-- Social Links -->
-    <section class="content-overlay social-links-area" aria-label="Contact and Social Media Links">
-      <h3>Connect</h3>
-      <ul>
-        <li>
-          <a href="https://github.com/sh-patterson" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-github"></i> GitHub
-          </a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/in/shawn-patterson-573b98361/" target="_blank" rel="noopener noreferrer">
-            <i class="fab fa-linkedin"></i> LinkedIn
-          </a>
-        </li>
-        <li>
-            <a href="mailto:shawnpatterson727@gmail.com">
-                <i class="fas fa-envelope"></i> Email Me
-            </a>
-        </li>
-      </ul>
-    </section>
-  </div> <!-- End of .mondrian-canvas -->
+    </div>
 
-  <!-- IMPORTANT: JavaScript initializations -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Typed.js for name - MODIFIED TARGET AND OPTIONS
-      if (document.getElementById('typed-text')) { 
-        new Typed('#typed-text', { 
-          strings: ['shawn patterson'],
-          typeSpeed: 80,
-          backSpeed: 0,
-          showCursor: false,  
-          loop: false         
-        });
-      }
+    <script>
+        const canvas = document.getElementById('sand-canvas');
+        const ctx = canvas.getContext('2d');
 
-      // Intersection Observer for "About Me" paragraphs fade-in
-      const aboutMeElements = document.querySelectorAll('.about-me-area .about-me');
-      if (aboutMeElements.length > 0) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.1 });
+        // --- CONFIGURATION ---
+        // Extended character set for more intricate patterns
+        const chars = " ·.¸,:;~=+#%@▓█*°•☼░▒"; 
+        
+        // Ultra-Bright Primary Colors
+        const colors = {
+            blue: "#0055FF",   // Vivid Blue
+            white: "#FFFFFF",  // Pure White
+            red: "#FF0000",    // Vivid Red
+            green: "#00FF00",  // Vivid Green
+            yellow: "#FFFF00", // Vivid Yellow
+            gold: "#FFD700",   // Rich Gold
+            void: "#000000"   
+        };
 
-        aboutMeElements.forEach(p => observer.observe(p));
-      }
-    });
+        let width, height, cols, rows, fontSize;
+        let time = 0;
+        
+        // --- STATE MANAGEMENT ---
+        let scrollProgress = 0;
+        let formationProgress = 0; 
 
-    // Grid-Line Pulse on Scroll (outside DOMContentLoaded for window event)
-    const lines = document.querySelectorAll('.mondrian-canvas .line'); 
-    if (lines.length > 0) {
-        let pulseTimeout;
+        function resize() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            // High density for "sand grain" look
+            fontSize = width < 600 ? 6 : 9; 
+            canvas.width = width;
+            canvas.height = height;
+            ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            cols = Math.floor(width / (fontSize * 0.6));
+            rows = Math.floor(height / fontSize);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Scroll Handler
         window.addEventListener('scroll', () => {
-            lines.forEach(line => line.classList.add('pulse'));
-            clearTimeout(pulseTimeout);
-            pulseTimeout = setTimeout(() => {
-                lines.forEach(line => line.classList.remove('pulse'));
-            }, 200);
+            const scrollY = window.scrollY;
+            const windowH = window.innerHeight;
+            // Normalize scroll to a 0-1 range for the transition phase
+            scrollProgress = Math.min(Math.max(scrollY / (windowH * 0.8), 0), 1.5);
         });
-    }
-  </script>
+
+        // --- MATH HELPERS ---
+        function rotate(x, y, a) {
+            return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
+        }
+
+        // --- THE RENDER LOOP ---
+        function draw() {
+            // Auto-formation intro
+            if (formationProgress < 1) formationProgress += 0.005;
+
+            // Clear screen
+            ctx.clearRect(0, 0, width, height);
+
+            const cx = cols / 2;
+            const cy = rows / 2;
+
+            // Scroll effects
+            const destruct = Math.min(scrollProgress, 1);
+            
+            // Rotation
+            const globalRot = time * 0.05 + (destruct * time * 0.1);
+
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    
+                    // --- 1. COORDINATE SPACE ---
+                    let u = (x - cx) / cx;
+                    let v = (y - cy) / cy;
+                    u *= (width / height); 
+
+                    // --- 2. THE WIPING EFFECT ---
+                    let noiseX = Math.sin(v * 10 + time) * destruct * 0.5;
+                    let noiseY = Math.cos(u * 10 + time) * destruct * 0.5;
+                    
+                    // Twist
+                    if (destruct > 0) {
+                        const [ru, rv] = rotate(u, v, destruct * 2); 
+                        u = ru + noiseX;
+                        v = rv + noiseY;
+                    }
+
+                    const r = Math.sqrt(u*u + v*v);
+                    const theta = Math.atan2(v, u);
+                    const [rotU, rotV] = rotate(u, v, globalRot);
+                    const thetaRot = Math.atan2(rotV, rotU);
+
+                    // --- 3. RENDERING LOGIC ---
+
+                    let char = '';
+                    let color = '';
+
+                    // SCENARIO A: MANDALA (Intricate Chenrezig-inspired design)
+                    if (destruct < 1) {
+                        if (r < formationProgress * 1.2) {
+                            const [sqU, sqV] = rotate(u, v, -globalRot * 0.5);
+                            const rSquare = Math.max(Math.abs(sqU), Math.abs(sqV));
+
+                            // -- 1. CENTER FLOWER (Strong Primary Colors) --
+                            if (r < 0.35) {
+                                // The geometric flower shape (4 main petals)
+                                // We use a squircle-like math for stronger separation
+                                const angle = thetaRot; 
+                                const quadrant = Math.floor(((angle + Math.PI) / (Math.PI * 2)) * 4) % 4;
+                                
+                                // Center Deity Spot
+                                if (r < 0.08) {
+                                     char = "█"; color = colors.white;
+                                }
+                                // The 4 Primary Petals
+                                else {
+                                    // Use a dense sine wave for petal shape
+                                    const petalShape = Math.sin(thetaRot * 2) * 0.5 + 0.5; 
+                                    // Or simpler: Just sectors for pure strength
+                                    
+                                    if (r < 0.35) {
+                                        // Use very dense char for the "Strong" look
+                                        char = "▓"; 
+                                        
+                                        // Assign color based on quadrant
+                                        if (quadrant === 0) color = colors.blue;
+                                        else if (quadrant === 1) color = colors.yellow;
+                                        else if (quadrant === 2) color = colors.red;
+                                        else color = colors.green;
+
+                                        // Add texture/shading to the petal
+                                        if (r > 0.25 && Math.random() > 0.7) char = "▒";
+                                    }
+                                }
+                            }
+                            // -- 2. SQUARE PALACE (Detailed walls & gates) --
+                            else if (rSquare < 0.6) {
+                                // Gates at cardinal directions
+                                const isGate = (Math.abs(sqU) < 0.1 && sqV > 0.45) || (Math.abs(sqU) < 0.1 && sqV < -0.45) ||
+                                               (Math.abs(sqV) < 0.1 && sqU > 0.45) || (Math.abs(sqV) < 0.1 && sqU < -0.45);
+                                
+                                if (isGate) {
+                                    char = "█"; color = colors.gold;
+                                } else if (rSquare > 0.55) { // Outer walls
+                                    char = "▓"; color = colors.white; 
+                                } else if (rSquare > 0.45) { // Inner walls with pattern
+                                    if ((Math.floor(sqU * 30) + Math.floor(sqV * 30)) % 2 === 0) {
+                                        char = "▒"; color = colors.red;
+                                    } else {
+                                        char = "░"; color = colors.blue;
+                                    }
+                                } else { // Floor decoration
+                                    if (Math.random() > 0.95) { char = "•"; color = colors.gold; }
+                                }
+                            }
+                            // -- 3. OUTER CIRCLES (Vajra & Fire Rings) --
+                            else if (r < 0.85) {
+                                if (r < 0.7) { // Lotus petal ring
+                                     const outerPetals = Math.sin(thetaRot * 32) * 0.5 + 0.5;
+                                     if (r < 0.7 - (outerPetals * 0.03)) {
+                                        char = "°"; color = colors.green;
+                                     }
+                                } else if (r < 0.78) { // Vajra ring
+                                    if (Math.sin(thetaRot * 64) > 0.5) {
+                                        char = "*"; color = colors.gold;
+                                    }
+                                } else { // Fire ring
+                                    const fire = Math.sin(theta * 40 - time * 8);
+                                    if (fire > 0) {
+                                        char = Math.random() > 0.5 ? "~" : "•";
+                                        color = `hsl(${Math.random() * 60}, 100%, 60%)`; 
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // SCENARIO B: GALAXY WEAVING
+                    if (destruct > 0.1) {
+                        if (Math.random() < destruct * 0.8) { // High density galaxy
+                            const ring = Math.sin(r * 25 + time * 2);
+                            if (ring > 0.97 && r > 0.2) {
+                                char = "·"; 
+                                color = colors.gold;
+                            } 
+                            
+                            // Weaving spirals using the primary colors
+                            const spiralDef = r * 8 + theta * 5 - time * 3;
+                            if (Math.abs(Math.sin(spiralDef)) < 0.45) { 
+                                const colorSelector = Math.floor(Math.abs(spiralDef * 1.5)) % 4;
+                                const rand = Math.random();
+                                char = rand > 0.6 ? "+" : (rand > 0.3 ? ":" : "."); 
+
+                                switch(colorSelector) {
+                                    case 0: color = colors.red; break;
+                                    case 1: color = colors.blue; break; 
+                                    case 2: color = colors.green; break;
+                                    case 3: color = colors.yellow; break;
+                                    default: color = colors.white;
+                                }
+                            }
+                        }
+                    }
+
+                    // --- DRAWING ---
+                    if (char) {
+                        const px = x * (fontSize * 0.6) + (fontSize * 0.3);
+                        const py = y * fontSize + (fontSize * 0.5);
+
+                        let opacity = 1;
+                        if (destruct > 0 && destruct < 1) {
+                             // Galaxy particles fade in
+                             if (destruct > 0.1 && (color === colors.red || color === colors.blue || color === colors.green || color === colors.yellow || color === colors.gold)) {
+                                opacity = destruct;
+                             } 
+                             // Mandala particles fade out
+                             else {
+                                 opacity = 1 - destruct;
+                             }
+                        }
+                        
+                        ctx.globalAlpha = opacity;
+                        ctx.fillStyle = color;
+                        ctx.fillText(char, px, py);
+                        ctx.globalAlpha = 1.0; 
+                    }
+                }
+            }
+
+            time += 0.02;
+            requestAnimationFrame(draw);
+        }
+
+        // Start animation immediately
+        draw();
+
+    </script>
 </body>
 </html>
