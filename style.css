@@ -2,6 +2,7 @@
   --bg-color: #020202;
   --text-primary: #f0f0f0;
   --gold: #FFD700;
+  --accent-cyan: #5FF7E0;
   --font-mono: 'JetBrains Mono', monospace;
   --font-serif: 'Cinzel', serif;
 }
@@ -73,7 +74,7 @@ h1 {
 
 .subtitle {
   font-family: var(--font-mono);
-  color: var(--gold);
+  color: var(--accent-cyan);
   letter-spacing: 4px;
   text-transform: uppercase;
   font-size: 0.9rem;
