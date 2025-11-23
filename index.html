@@ -3,229 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shawn Patterson // Impermanence</title>
-    
+    <title>Shawn Patterson // Opposition Research</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
 
-    <style>
-        :root {
-            --bg-color: #020202;
-            --text-primary: #f0f0f0;
-            --gold: #FFD700; /* Brighter, richer Gold */
-            --font-mono: 'JetBrains Mono', monospace;
-            --font-serif: 'Cinzel', serif;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-mono);
-            overflow-x: hidden;
-            scrollbar-width: none; 
-            -ms-overflow-style: none;
-        }
-        body::-webkit-scrollbar { display: none; }
-
-        /* --- THE GENERATIVE CANVAS --- */
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: 0;
-            pointer-events: none;
-            background: radial-gradient(circle at center, #111 0%, #000 80%);
-        }
-
-        /* --- UI LAYERS --- */
-        .content-wrapper {
-            position: relative;
-            z-index: 10;
-        }
-
-        /* HERO SECTION */
-        .hero-section {
-            height: 100vh;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-        }
-
-        .hero-text-block {
-            background: radial-gradient(circle, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 70%);
-            padding: 2rem;
-            border-radius: 50%;
-            mix-blend-mode: screen;
-        }
-
-        h1 {
-            font-family: var(--font-serif);
-            font-size: clamp(3rem, 8vw, 6rem);
-            margin: 0;
-            line-height: 0.9;
-            letter-spacing: -2px;
-            color: #fff;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-            opacity: 0;
-            animation: fadeInText 2s ease-out forwards;
-            animation-delay: 1s;
-        }
-
-        .subtitle {
-            font-family: var(--font-mono);
-            color: var(--gold);
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            opacity: 0;
-            animation: fadeInText 2s ease-out forwards;
-            animation-delay: 1.5s;
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            bottom: 2rem;
-            color: rgba(255,255,255,0.5);
-            font-size: 0.8rem;
-            animation: pulse 2s infinite;
-        }
-
-        /* BIO SECTION */
-        .bio-section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 1.5rem;
-            margin-top: 20vh; 
-        }
-
-        .glass-panel {
-            background: rgba(10, 10, 10, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 215, 0, 0.2);
-            padding: 3rem;
-            max-width: 800px;
-            width: 100%;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
-        }
-
-        .glass-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 2px;
-            background: var(--gold);
-            box-shadow: 0 0 10px var(--gold);
-        }
-
-        h2 {
-            font-family: var(--font-serif);
-            font-size: 2.5rem;
-            margin-top: 0;
-            color: #e0e0e0;
-        }
-
-        p {
-            line-height: 1.8;
-            font-size: 1.1rem;
-            color: #ccc;
-            margin-bottom: 2rem;
-        }
-
-        .highlight {
-            color: var(--gold);
-            font-weight: bold;
-        }
-
-        /* LINKS */
-        .links-row {
-            display: flex;
-            gap: 2rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding-top: 2rem;
-        }
-
-        .link-item {
-            color: #fff;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.3s;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .link-item:hover {
-            color: var(--gold);
-        }
-
-        /* ANIMATIONS */
-        @keyframes fadeInText {
-            to { opacity: 1; }
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
     <div id="canvas-container">
         <canvas id="sand-canvas"></canvas>
     </div>
 
     <div class="content-wrapper">
-        
-        <!-- SCENE 1: THE MANDALA -->
         <section class="hero-section">
             <div class="hero-text-block">
                 <h1>SHAWN<br>PATTERSON</h1>
                 <div class="subtitle">Opposition Researcher // AI Enthusiast</div>
             </div>
-            <div class="scroll-indicator">SCROLL TO DISSOLVE</div>
+            <div class="scroll-indicator">SCROLL TO EXPLORE</div>
         </section>
 
-        <!-- SCENE 2: THE GALAXY (BIO) -->
-        <section class="bio-section">
+        <section class="bio-section" id="about">
             <div class="glass-panel">
-                <h2>Impermanence &amp; Insight</h2>
+                <h2>About Me</h2>
                 <p>
-                    I’m a mission-driven investigator, strategist, and innovator who finds <span class="highlight">victory in the jaws of defeat</span>. From West Virginia to Mississippi to Arizona, I’ve made history winning campaigns the institutions had already written off.
+                    I’m a mission-driven investigator, strategist, and innovator who finds victory in the jaws of defeat. From West Virginia to Mississippi to Arizona, I’ve made history winning campaigns the institutions had already written off.
                 </p>
                 <p>
-                    Right now, I’m fusing <span class="highlight">AI innovation</span> with investigative workflows to make political research faster, sharper, and free from outdated methods.
+                    Right now, I’m fusing AI innovation with investigative workflows to make political research faster, sharper, and free from outdated methods.
                 </p>
                 <p>
                     You’ll find me with Braque in a local gallery, in the front row at a Converge show, or rolling 20-sided dice with friends. I grew up in Buffalo mud, now I’m kicking around DC dirt.
                 </p>
                 <p>
-                    Curious about the future of opposition research, campaign tech, or what it takes to win against the odds? Let’s connect.
+                    Curious about the future of opposition research, campaign tech, or what it takes to win against the odds? Let’s
+                    <a href="mailto:shawnpatterson727@gmail.com" class="dice-cta">
+                        connect <i class="fas fa-dice-d20"></i>
+                    </a>.
                 </p>
 
                 <div class="links-row">
@@ -241,249 +59,203 @@
                 </div>
             </div>
         </section>
-
     </div>
 
     <script>
-        const canvas = document.getElementById('sand-canvas');
-        const ctx = canvas.getContext('2d');
+        (() => {
+            const canvas = document.getElementById('sand-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
 
-        // --- CONFIGURATION ---
-        // Extended character set for more intricate patterns
-        const chars = " ·.¸,:;~=+#%@▓█*°•☼░▒"; 
-        
-        // Ultra-Bright Primary Colors
-        const colors = {
-            blue: "#0055FF",   // Vivid Blue
-            white: "#FFFFFF",  // Pure White
-            red: "#FF0000",    // Vivid Red
-            green: "#00FF00",  // Vivid Green
-            yellow: "#FFFF00", // Vivid Yellow
-            gold: "#FFD700",   // Rich Gold
-            void: "#000000"   
-        };
+            const chars = " ·.¸,:;~=+#%@▓█*°•☼░▒";
+            const colors = {
+                blue: "#0055FF",
+                white: "#FFFFFF",
+                red: "#FF0000",
+                green: "#00FF00",
+                yellow: "#FFFF00",
+                gold: "#FFD700",
+                void: "#000000"
+            };
 
-        let width, height, cols, rows, fontSize;
-        let time = 0;
-        
-        // --- STATE MANAGEMENT ---
-        let scrollProgress = 0;
-        let formationProgress = 0; 
+            let width, height, cols, rows, fontSize;
+            let time = 0;
+            let scrollProgress = 0;
+            let formationProgress = 0;
 
-        function resize() {
-            width = window.innerWidth;
-            height = window.innerHeight;
-            // High density for "sand grain" look
-            fontSize = width < 600 ? 6 : 9; 
-            canvas.width = width;
-            canvas.height = height;
-            ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            cols = Math.floor(width / (fontSize * 0.6));
-            rows = Math.floor(height / fontSize);
-        }
-        window.addEventListener('resize', resize);
-        resize();
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                fontSize = width < 600 ? 6 : 9;
+                canvas.width = width;
+                canvas.height = height;
+                ctx.font = `${fontSize}px "JetBrains Mono", monospace`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                cols = Math.floor(width / (fontSize * 0.6));
+                rows = Math.floor(height / fontSize);
+            }
+            window.addEventListener('resize', resize);
+            resize();
 
-        // Scroll Handler
-        window.addEventListener('scroll', () => {
-            const scrollY = window.scrollY;
-            const windowH = window.innerHeight;
-            // Normalize scroll to a 0-1 range for the transition phase
-            scrollProgress = Math.min(Math.max(scrollY / (windowH * 0.8), 0), 1.5);
-        });
+            window.addEventListener('scroll', () => {
+                const scrollY = window.scrollY;
+                const windowH = window.innerHeight;
+                scrollProgress = Math.min(Math.max(scrollY / (windowH * 0.8), 0), 1.5);
+            });
 
-        // --- MATH HELPERS ---
-        function rotate(x, y, a) {
-            return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
-        }
-
-        // --- THE RENDER LOOP ---
-        function draw() {
-            // Auto-formation intro
-            if (formationProgress < 1) formationProgress += 0.005;
-
-            // Clear screen
-            ctx.clearRect(0, 0, width, height);
-
-            const cx = cols / 2;
-            const cy = rows / 2;
-
-            // Scroll effects
-            const destruct = Math.min(scrollProgress, 1);
-            
-            // Rotation
-            const globalRot = time * 0.05 + (destruct * time * 0.1);
-
-            for (let y = 0; y < rows; y++) {
-                for (let x = 0; x < cols; x++) {
-                    
-                    // --- 1. COORDINATE SPACE ---
-                    let u = (x - cx) / cx;
-                    let v = (y - cy) / cy;
-                    u *= (width / height); 
-
-                    // --- 2. THE WIPING EFFECT ---
-                    let noiseX = Math.sin(v * 10 + time) * destruct * 0.5;
-                    let noiseY = Math.cos(u * 10 + time) * destruct * 0.5;
-                    
-                    // Twist
-                    if (destruct > 0) {
-                        const [ru, rv] = rotate(u, v, destruct * 2); 
-                        u = ru + noiseX;
-                        v = rv + noiseY;
-                    }
-
-                    const r = Math.sqrt(u*u + v*v);
-                    const theta = Math.atan2(v, u);
-                    const [rotU, rotV] = rotate(u, v, globalRot);
-                    const thetaRot = Math.atan2(rotV, rotU);
-
-                    // --- 3. RENDERING LOGIC ---
-
-                    let char = '';
-                    let color = '';
-
-                    // SCENARIO A: MANDALA (Intricate Chenrezig-inspired design)
-                    if (destruct < 1) {
-                        if (r < formationProgress * 1.2) {
-                            const [sqU, sqV] = rotate(u, v, -globalRot * 0.5);
-                            const rSquare = Math.max(Math.abs(sqU), Math.abs(sqV));
-
-                            // -- 1. CENTER FLOWER (Strong Primary Colors) --
-                            if (r < 0.35) {
-                                // The geometric flower shape (4 main petals)
-                                // We use a squircle-like math for stronger separation
-                                const angle = thetaRot; 
-                                const quadrant = Math.floor(((angle + Math.PI) / (Math.PI * 2)) * 4) % 4;
-                                
-                                // Center Deity Spot
-                                if (r < 0.08) {
-                                     char = "█"; color = colors.white;
-                                }
-                                // The 4 Primary Petals
-                                else {
-                                    // Use a dense sine wave for petal shape
-                                    const petalShape = Math.sin(thetaRot * 2) * 0.5 + 0.5; 
-                                    // Or simpler: Just sectors for pure strength
-                                    
-                                    if (r < 0.35) {
-                                        // Use very dense char for the "Strong" look
-                                        char = "▓"; 
-                                        
-                                        // Assign color based on quadrant
-                                        if (quadrant === 0) color = colors.blue;
-                                        else if (quadrant === 1) color = colors.yellow;
-                                        else if (quadrant === 2) color = colors.red;
-                                        else color = colors.green;
-
-                                        // Add texture/shading to the petal
-                                        if (r > 0.25 && Math.random() > 0.7) char = "▒";
-                                    }
-                                }
-                            }
-                            // -- 2. SQUARE PALACE (Detailed walls & gates) --
-                            else if (rSquare < 0.6) {
-                                // Gates at cardinal directions
-                                const isGate = (Math.abs(sqU) < 0.1 && sqV > 0.45) || (Math.abs(sqU) < 0.1 && sqV < -0.45) ||
-                                               (Math.abs(sqV) < 0.1 && sqU > 0.45) || (Math.abs(sqV) < 0.1 && sqU < -0.45);
-                                
-                                if (isGate) {
-                                    char = "█"; color = colors.gold;
-                                } else if (rSquare > 0.55) { // Outer walls
-                                    char = "▓"; color = colors.white; 
-                                } else if (rSquare > 0.45) { // Inner walls with pattern
-                                    if ((Math.floor(sqU * 30) + Math.floor(sqV * 30)) % 2 === 0) {
-                                        char = "▒"; color = colors.red;
-                                    } else {
-                                        char = "░"; color = colors.blue;
-                                    }
-                                } else { // Floor decoration
-                                    if (Math.random() > 0.95) { char = "•"; color = colors.gold; }
-                                }
-                            }
-                            // -- 3. OUTER CIRCLES (Vajra & Fire Rings) --
-                            else if (r < 0.85) {
-                                if (r < 0.7) { // Lotus petal ring
-                                     const outerPetals = Math.sin(thetaRot * 32) * 0.5 + 0.5;
-                                     if (r < 0.7 - (outerPetals * 0.03)) {
-                                        char = "°"; color = colors.green;
-                                     }
-                                } else if (r < 0.78) { // Vajra ring
-                                    if (Math.sin(thetaRot * 64) > 0.5) {
-                                        char = "*"; color = colors.gold;
-                                    }
-                                } else { // Fire ring
-                                    const fire = Math.sin(theta * 40 - time * 8);
-                                    if (fire > 0) {
-                                        char = Math.random() > 0.5 ? "~" : "•";
-                                        color = `hsl(${Math.random() * 60}, 100%, 60%)`; 
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // SCENARIO B: GALAXY WEAVING
-                    if (destruct > 0.1) {
-                        if (Math.random() < destruct * 0.8) { // High density galaxy
-                            const ring = Math.sin(r * 25 + time * 2);
-                            if (ring > 0.97 && r > 0.2) {
-                                char = "·"; 
-                                color = colors.gold;
-                            } 
-                            
-                            // Weaving spirals using the primary colors
-                            const spiralDef = r * 8 + theta * 5 - time * 3;
-                            if (Math.abs(Math.sin(spiralDef)) < 0.45) { 
-                                const colorSelector = Math.floor(Math.abs(spiralDef * 1.5)) % 4;
-                                const rand = Math.random();
-                                char = rand > 0.6 ? "+" : (rand > 0.3 ? ":" : "."); 
-
-                                switch(colorSelector) {
-                                    case 0: color = colors.red; break;
-                                    case 1: color = colors.blue; break; 
-                                    case 2: color = colors.green; break;
-                                    case 3: color = colors.yellow; break;
-                                    default: color = colors.white;
-                                }
-                            }
-                        }
-                    }
-
-                    // --- DRAWING ---
-                    if (char) {
-                        const px = x * (fontSize * 0.6) + (fontSize * 0.3);
-                        const py = y * fontSize + (fontSize * 0.5);
-
-                        let opacity = 1;
-                        if (destruct > 0 && destruct < 1) {
-                             // Galaxy particles fade in
-                             if (destruct > 0.1 && (color === colors.red || color === colors.blue || color === colors.green || color === colors.yellow || color === colors.gold)) {
-                                opacity = destruct;
-                             } 
-                             // Mandala particles fade out
-                             else {
-                                 opacity = 1 - destruct;
-                             }
-                        }
-                        
-                        ctx.globalAlpha = opacity;
-                        ctx.fillStyle = color;
-                        ctx.fillText(char, px, py);
-                        ctx.globalAlpha = 1.0; 
-                    }
-                }
+            function rotate(x, y, a) {
+                return [x * Math.cos(a) - y * Math.sin(a), x * Math.sin(a) + y * Math.cos(a)];
             }
 
-            time += 0.02;
-            requestAnimationFrame(draw);
-        }
+            function draw() {
+                if (formationProgress < 1) formationProgress += 0.005;
 
-        // Start animation immediately
-        draw();
+                ctx.clearRect(0, 0, width, height);
 
+                const cx = cols / 2;
+                const cy = rows / 2;
+                const destruct = Math.min(scrollProgress, 1);
+                const globalRot = time * 0.05 + (destruct * time * 0.1);
+
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        let u = (x - cx) / cx;
+                        let v = (y - cy) / cy;
+                        u *= (width / height);
+
+                        let noiseX = Math.sin(v * 10 + time) * destruct * 0.5;
+                        let noiseY = Math.cos(u * 10 + time) * destruct * 0.5;
+
+                        if (destruct > 0) {
+                            const [ru, rv] = rotate(u, v, destruct * 2);
+                            u = ru + noiseX;
+                            v = rv + noiseY;
+                        }
+
+                        const r = Math.sqrt(u * u + v * v);
+                        const theta = Math.atan2(v, u);
+                        const [rotU, rotV] = rotate(u, v, globalRot);
+                        const thetaRot = Math.atan2(rotV, rotU);
+
+                        let char = '';
+                        let color = '';
+
+                        if (destruct < 1) {
+                            if (r < formationProgress * 1.2) {
+                                const [sqU, sqV] = rotate(u, v, -globalRot * 0.5);
+                                const rSquare = Math.max(Math.abs(sqU), Math.abs(sqV));
+
+                                if (r < 0.35) {
+                                    const angle = thetaRot;
+                                    const quadrant = Math.floor(((angle + Math.PI) / (Math.PI * 2)) * 4) % 4;
+
+                                    if (r < 0.08) {
+                                        char = "█"; color = colors.white;
+                                    } else {
+                                        const petalShape = Math.sin(thetaRot * 2) * 0.5 + 0.5;
+
+                                        if (r < 0.35) {
+                                            char = "▓";
+
+                                            if (quadrant === 0) color = colors.blue;
+                                            else if (quadrant === 1) color = colors.yellow;
+                                            else if (quadrant === 2) color = colors.red;
+                                            else color = colors.green;
+
+                                            if (r > 0.25 && Math.random() > 0.7) char = "▒";
+                                        }
+                                    }
+                                } else if (rSquare < 0.6) {
+                                    const isGate = (Math.abs(sqU) < 0.1 && sqV > 0.45) || (Math.abs(sqU) < 0.1 && sqV < -0.45) ||
+                                                   (Math.abs(sqV) < 0.1 && sqU > 0.45) || (Math.abs(sqV) < 0.1 && sqU < -0.45);
+
+                                    if (isGate) {
+                                        char = "█"; color = colors.gold;
+                                    } else if (rSquare > 0.55) {
+                                        char = "▓"; color = colors.white;
+                                    } else if (rSquare > 0.45) {
+                                        if ((Math.floor(sqU * 30) + Math.floor(sqV * 30)) % 2 === 0) {
+                                            char = "▒"; color = colors.red;
+                                        } else {
+                                            char = "░"; color = colors.blue;
+                                        }
+                                    } else {
+                                        if (Math.random() > 0.95) { char = "•"; color = colors.gold; }
+                                    }
+                                } else if (r < 0.85) {
+                                    if (r < 0.7) {
+                                        const outerPetals = Math.sin(thetaRot * 32) * 0.5 + 0.5;
+                                        if (r < 0.7 - (outerPetals * 0.03)) {
+                                            char = "°"; color = colors.green;
+                                        }
+                                    } else if (r < 0.78) {
+                                        if (Math.sin(thetaRot * 64) > 0.5) {
+                                            char = "*"; color = colors.gold;
+                                        }
+                                    } else {
+                                        const fire = Math.sin(theta * 40 - time * 8);
+                                        if (fire > 0) {
+                                            char = Math.random() > 0.5 ? "~" : "•";
+                                            color = `hsl(${Math.random() * 60}, 100%, 60%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (destruct > 0.1) {
+                            if (Math.random() < destruct * 0.8) {
+                                const ring = Math.sin(r * 25 + time * 2);
+                                if (ring > 0.97 && r > 0.2) {
+                                    char = "·";
+                                    color = colors.gold;
+                                }
+
+                                const spiralDef = r * 8 + theta * 5 - time * 3;
+                                if (Math.abs(Math.sin(spiralDef)) < 0.45) {
+                                    const colorSelector = Math.floor(Math.abs(spiralDef * 1.5)) % 4;
+                                    const rand = Math.random();
+                                    char = rand > 0.6 ? "+" : (rand > 0.3 ? ":" : ".");
+
+                                    switch (colorSelector) {
+                                        case 0: color = colors.red; break;
+                                        case 1: color = colors.blue; break;
+                                        case 2: color = colors.green; break;
+                                        case 3: color = colors.yellow; break;
+                                        default: color = colors.white;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (char) {
+                            const px = x * (fontSize * 0.6) + (fontSize * 0.3);
+                            const py = y * fontSize + (fontSize * 0.5);
+
+                            let opacity = 1;
+                            if (destruct > 0 && destruct < 1) {
+                                if (destruct > 0.1 && (color === colors.red || color === colors.blue || color === colors.green || color === colors.yellow || color === colors.gold)) {
+                                    opacity = destruct;
+                                } else {
+                                    opacity = 1 - destruct;
+                                }
+                            }
+
+                            ctx.globalAlpha = opacity;
+                            ctx.fillStyle = color;
+                            ctx.fillText(char, px, py);
+                            ctx.globalAlpha = 1.0;
+                        }
+                    }
+                }
+
+                time += 0.02;
+                requestAnimationFrame(draw);
+            }
+
+            draw();
+        })();
     </script>
 </body>
 </html>
