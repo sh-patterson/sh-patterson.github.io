@@ -1,0 +1,12 @@
+{
+  "name": "sh-patterson-github-io",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check:links": "node scripts/site-qa.mjs links",
+    "smoke:render": "node scripts/site-qa.mjs render",
+    "bench:canvas": "node scripts/site-qa.mjs bench",
+    "test": "npm run check:links && npm run smoke:render && npm run bench:canvas"
+  }
+}
