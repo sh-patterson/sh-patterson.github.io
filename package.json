@@ -4,9 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:writing": "node scripts/build-writing.mjs",
+    "check:writing": "node scripts/build-writing.mjs --check",
     "check:links": "node scripts/site-qa.mjs links",
     "smoke:render": "node scripts/site-qa.mjs render",
     "bench:canvas": "node scripts/site-qa.mjs bench",
-    "test": "npm run check:links && npm run smoke:render && npm run bench:canvas"
+    "test": "npm run check:writing && npm run check:links && npm run smoke:render && npm run bench:canvas"
   }
 }
