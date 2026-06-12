@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const postsDir = path.join(root, "posts");
 const writingDir = path.join(root, "writing");
 const check = process.argv.includes("--check");
+const previewDrafts = process.argv.includes("--preview-drafts");
 const siteUrl = "https://sh-patterson.github.io";
 
 function escapeHtml(value = "") {
@@ -24,7 +25,10 @@ function parseValue(raw) {
   const trimmed = raw.trim();
   if (trimmed === "true") return true;
   if (trimmed === "false") return false;
-  return trimmed.replace(/^['"]|['"]$/g, "");
+  if ((trimmed.startsWith("\"") && trimmed.endsWith("\"")) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
 }
 
 function parseFrontmatter(source, file) {
@@ -334,6 +338,27 @@ async function writeChecked(file, content, outputs) {
   await writeFile(file, content, "utf8");
 }
 
+async function writingOutputFiles(dir = writingDir) {
+  if (!existsSync(dir)) return [];
+  const entries = await readdir(dir, { withFileTypes: true });
+  const files = [];
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) files.push(...await writingOutputFiles(full));
+    else if (entry.name.endsWith(".html") || entry.name.endsWith(".xml")) files.push(full);
+  }
+  return files;
+}
+
+async function checkStaleWritingOutputs(outputs) {
+  const expected = new Set([...outputs.keys()].filter((file) => file.startsWith(writingDir)));
+  const current = await writingOutputFiles();
+  const stale = current.filter((file) => !expected.has(file));
+  if (stale.length) {
+    throw new Error(`Writing build has stale public output:\n${stale.map((file) => path.relative(root, file)).join("\n")}`);
+  }
+}
+
 async function updateHomepage(published, outputs) {
   const file = path.join(root, "index.html");
   const current = await readFile(file, "utf8");
@@ -347,16 +372,19 @@ async function updateHomepage(published, outputs) {
 async function main() {
   const posts = await loadPosts();
   const published = posts.filter((post) => !post.draft);
+  const publicPosts = previewDrafts ? posts : published;
   const outputs = new Map();
   if (!check) await rm(writingDir, { recursive: true, force: true });
-  for (const post of posts) {
+  for (const post of publicPosts) {
     await writeChecked(path.join(writingDir, post.slug, "index.html"), renderPost(post), outputs);
   }
   await writeChecked(path.join(writingDir, "index.html"), renderArchive(published), outputs);
   await writeChecked(path.join(writingDir, "feed.xml"), renderFeed(published), outputs);
   await updateHomepage(published, outputs);
+  if (check) await checkStaleWritingOutputs(outputs);
   const verb = check ? "checked" : "built";
-  console.log(`Writing ${verb}: ${posts.length} posts (${published.length} published).`);
+  const suffix = previewDrafts ? `; previewed ${publicPosts.length - published.length} drafts` : "";
+  console.log(`Writing ${verb}: ${posts.length} posts (${published.length} published${suffix}).`);
 }
 
 main().catch((error) => {
