@@ -450,7 +450,7 @@ h1 {
   }
 
   .folio-section {
-    padding: 3.5rem 0;
+    padding: 3.5rem var(--gutter);
   }
 }
 
@@ -492,7 +492,7 @@ h1 {
   }
 
   .folio-section {
-    padding: 3rem 0;
+    padding: 3rem var(--gutter);
   }
 }
 

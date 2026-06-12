@@ -26,6 +26,7 @@ const mime = {
   ".md": "text/markdown; charset=utf-8",
   ".png": "image/png",
   ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
 };
 
 function fail(message) {
@@ -295,6 +296,7 @@ async function withBrowser(callback) {
 async function renderCase(baseUrl, chromePort, label, metrics) {
   const page = await newPage(chromePort);
   await page.send("Page.enable");
+  await page.send("Network.enable");
   await page.send("Runtime.enable");
   await page.send("Log.enable");
   await page.send("Emulation.setDeviceMetricsOverride", metrics);
@@ -337,6 +339,19 @@ async function renderCase(baseUrl, chromePort, label, metrics) {
   const errors = page.events
     .filter((event) => event.method === "Runtime.exceptionThrown" || (event.method === "Log.entryAdded" && event.params?.entry?.level === "error"))
     .map((event) => event.params);
+  const localOrigin = new URL(baseUrl).origin;
+  const thirdPartyRequests = page.events
+    .filter((event) => event.method === "Network.requestWillBeSent")
+    .map((event) => event.params?.request?.url)
+    .filter(Boolean)
+    .filter((url) => {
+      if (url === "about:blank" || url.startsWith("data:") || url.startsWith("blob:")) return false;
+      try {
+        return new URL(url).origin !== localOrigin;
+      } catch {
+        return false;
+      }
+    });
   await page.send("Page.close").catch(() => {});
   page.close();
 
@@ -348,6 +363,7 @@ async function renderCase(baseUrl, chromePort, label, metrics) {
   if (result.overflowing.length) fail(`${label}: elements overflow viewport: ${JSON.stringify(result.overflowing)}`);
   if (!result.canvas.width || !result.canvas.height) fail(`${label}: canvas did not size correctly`);
   if (errors.length) fail(`${label}: console/runtime errors: ${JSON.stringify(errors.slice(0, 3))}`);
+  if (thirdPartyRequests.length) fail(`${label}: third-party page-load requests: ${thirdPartyRequests.join(", ")}`);
   return { label, screenshotPath, result };
 }
 
