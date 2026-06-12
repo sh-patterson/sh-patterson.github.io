@@ -45,6 +45,7 @@
   let heroHeight = 0;
   let isReversing = false;
   let animationFrame = 0;
+  let canvasVisible = true;
 
   function clamp(value, min = 0, max = 1) {
     return Math.min(Math.max(value, min), max);
@@ -305,6 +306,26 @@
     animationFrame = requestAnimationFrame(draw);
   }
 
+  function cancelPendingFrames() {
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+    }
+    if (scrollFrame) {
+      cancelAnimationFrame(scrollFrame);
+      scrollFrame = 0;
+    }
+  }
+
+  function setRunning(nextRunning) {
+    running = nextRunning;
+    if (!running) {
+      cancelPendingFrames();
+      return;
+    }
+    scheduleDraw();
+  }
+
   function heroWipeProgress() {
     const isMobile = width < 700;
     const cyRatio = isMobile ? 0.12 : 0.30;
@@ -369,14 +390,19 @@
   }
 
   document.addEventListener("visibilitychange", () => {
-    running = !document.hidden;
-    scheduleDraw();
+    if (document.hidden) {
+      setRunning(false);
+      return;
+    }
+    scrollProgress = heroWipeProgress();
+    setRunning(canvasVisible);
+    if (running && reduceMotion.matches) draw(performance.now(), true);
   });
 
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(([entry]) => {
-      running = entry.isIntersecting && !document.hidden;
-      scheduleDraw();
+      canvasVisible = entry.isIntersecting;
+      setRunning(canvasVisible && !document.hidden);
     });
     observer.observe(canvas);
   }
