@@ -6,9 +6,9 @@ tags:
   - AI
   - management
   - delegation
-draft: true
+draft: false
 ---
-<!-- CANONICAL SOURCE: LinkedIn article https://www.linkedin.com/pulse/you-cant-delegate-people-ai-either-shawn-patterson-k34ye/ captured from Shawn's Chrome session on 2026-06-12. -->
+<!-- SOURCE: LinkedIn article https://www.linkedin.com/pulse/you-cant-delegate-people-ai-either-shawn-patterson-k34ye/ -->
 
 *Originally published on LinkedIn.*
 

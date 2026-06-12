@@ -6,9 +6,9 @@ tags:
   - hiring
   - management
   - campaigns
-draft: true
+draft: false
 ---
-<!-- CANONICAL SOURCE: LinkedIn article https://www.linkedin.com/pulse/everyone-teaches-you-how-do-your-campaign-job-nobody-hire-patterson-yyjpe/ captured from Shawn's Chrome session on 2026-06-12. -->
+<!-- SOURCE: LinkedIn article https://www.linkedin.com/pulse/everyone-teaches-you-how-do-your-campaign-job-nobody-hire-patterson-yyjpe/ -->
 
 *Originally published on LinkedIn.*
 

@@ -117,7 +117,6 @@ function renderMarkdown(markdown) {
     }
     if (/^<!--[\s\S]*-->$/.test(trimmed)) {
       flushParagraph(); flushList(); flushQuote();
-      html.push(trimmed);
       continue;
     }
     const heading = trimmed.match(/^(#{1,3})\s+(.+)$/);

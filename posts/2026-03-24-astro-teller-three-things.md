@@ -6,9 +6,9 @@ tags:
   - AI
   - learning
   - systems
-draft: true
+draft: false
 ---
-<!-- TEXT DATE UNCERTAINTY: Canonical text captured from LinkedIn feed post https://www.linkedin.com/feed/update/urn:li:activity:7442322272016621568/ in Shawn's Chrome session on 2026-06-12. LinkedIn exposed only a relative "2mo" date in the readable DOM, so the date remains from C:\Users\shawn\OneDrive\Documents\Obsidian Vault\notes\projects\content-seeds\Astro Teller - Three Things I Learned.md. -->
+<!-- SOURCE: LinkedIn feed post https://www.linkedin.com/feed/update/urn:li:activity:7442322272016621568/ -->
 
 *Originally published on LinkedIn.*
 

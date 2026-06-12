@@ -6,9 +6,9 @@ tags:
   - essay
   - art
   - obsession
-draft: true
+draft: false
 ---
-<!-- CANONICAL SOURCE: LinkedIn article https://www.linkedin.com/pulse/staring-saint-jerome-two-paintings-obsession-shawn-patterson-ndsce/ captured from Shawn's Chrome session on 2026-06-12. -->
+<!-- SOURCE: LinkedIn article https://www.linkedin.com/pulse/staring-saint-jerome-two-paintings-obsession-shawn-patterson-ndsce/ -->
 
 *Originally published on LinkedIn.*
 
