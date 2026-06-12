@@ -23,6 +23,12 @@
   --step-5: clamp(3.2rem, 7.8vw, 5.6rem);
   --gutter: clamp(1.2rem, 4vw, 3.5rem);
   --content: 52rem;
+  --space-1: 0.5rem;
+  --space-2: 0.85rem;
+  --space-3: 1.4rem;
+  --space-4: 2.25rem;
+  --space-5: 3.6rem;
+  --space-6: 4.5rem;
 }
 
 * {
@@ -66,7 +72,7 @@ a:focus-visible {
   transform: translateY(-160%);
   background: var(--text);
   color: var(--bg);
-  padding: 0.65rem 0.85rem;
+  padding: 0.65rem var(--space-2);
   font-family: var(--font-mono);
   font-size: var(--step-0);
 }
@@ -132,7 +138,7 @@ a:focus-visible {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 1rem 0 3.5rem;
+  padding: 1rem 0 var(--space-6);
 }
 
 h1,
@@ -175,7 +181,7 @@ h1 {
 }
 
 .lede {
-  max-width: 30ch;
+  max-width: 36ch;
   margin-bottom: 1.6rem;
   font-family: var(--font-serif);
   font-size: clamp(1.4rem, 2.4vw, 1.8rem);
@@ -226,12 +232,12 @@ h1 {
 }
 
 .contact-inline a + a {
-  margin-left: 0.85rem;
+  margin-left: var(--space-2);
 }
 
 .contact-inline a + a::before {
   content: "·";
-  margin-right: 0.85rem;
+  margin-right: var(--space-2);
   color: var(--gold);
   text-decoration: none;
 }
@@ -239,7 +245,7 @@ h1 {
 .folio-section {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
-  padding: 4.5rem var(--gutter);
+  padding: var(--space-6) var(--gutter);
   border-top: 1px solid var(--rule-strong);
 }
 
@@ -250,7 +256,7 @@ h1 {
 
 .folio-section h2 {
   max-width: 22ch;
-  margin-bottom: 1.4rem;
+  margin-bottom: var(--space-3);
   font-family: var(--font-serif);
   font-size: var(--step-4);
   font-weight: 500;
@@ -288,7 +294,7 @@ h1 {
 .project-list article {
   display: grid;
   grid-template-columns: minmax(11rem, 0.4fr) minmax(0, 1fr);
-  gap: 1.4rem;
+  gap: var(--space-3);
   padding: 1.1rem 0;
   border-bottom: 1px solid var(--rule);
 }
@@ -337,8 +343,8 @@ h1 {
 .ledger article {
   display: grid;
   grid-template-columns: 6rem minmax(0, 1fr);
-  gap: 1.4rem;
-  padding: 1.3rem 0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -364,7 +370,7 @@ h1 {
 .ledger blockquote p {
   color: var(--text-soft);
   font-family: var(--font-sans);
-  font-size: var(--step-2);
+  font-size: var(--step-3);
   font-style: normal;
   line-height: 1.5;
   margin-bottom: 0;
