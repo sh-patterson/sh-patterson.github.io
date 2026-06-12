@@ -39,6 +39,10 @@
   --rule: rgba(243, 234, 219, 0.13);
   --rule-strong: rgba(243, 234, 219, 0.24);
   --scrim: rgba(11, 12, 14, 0.78);
+  --paper-bg: #faf6ee;
+  --paper-ink: #1d1c1a;
+  --paper-soft: #5a554c;
+  --paper-rule: rgba(29, 28, 26, 0.14);
   --font-serif: "Fraunces", Georgia, serif;
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
@@ -443,6 +447,244 @@ h1 {
   color: var(--muted);
 }
 
+.writing-archive {
+  min-height: 100vh;
+}
+
+.writing-shell {
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-6);
+}
+
+.writing-header {
+  margin-bottom: var(--space-5);
+}
+
+.writing-header .contact-inline {
+  margin-bottom: var(--space-4);
+}
+
+.writing-header h1,
+.paper .post-header h1 {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-serif);
+  font-weight: 650;
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-wrap: balance;
+}
+
+.writing-header h1 {
+  max-width: 14ch;
+  font-size: var(--step-5);
+}
+
+.writing-year {
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.writing-year h2 {
+  margin-bottom: var(--space-3);
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.writing-list {
+  display: grid;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.writing-list li {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.writing-list time {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  text-transform: uppercase;
+}
+
+.writing-list a,
+.writing-archive-link a {
+  color: var(--text);
+  text-decoration-color: rgba(201, 164, 93, 0.55);
+  text-underline-offset: 0.25em;
+}
+
+.writing-list a:hover,
+.writing-archive-link a:hover {
+  color: var(--cyan);
+}
+
+.writing-list p {
+  grid-column: 2;
+  margin: -0.8rem 0 0;
+  color: var(--text-soft);
+}
+
+.paper {
+  color-scheme: light;
+  background: var(--paper-bg);
+  color: var(--paper-ink);
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.paper a {
+  color: var(--paper-ink);
+  text-decoration-color: #9a7b3f;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.paper a:hover {
+  color: #7f642f;
+}
+
+.paper-shell {
+  max-width: 68ch;
+  margin: 0 auto;
+  padding: var(--space-5) var(--gutter) var(--space-6);
+}
+
+.paper-nav {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  text-transform: uppercase;
+}
+
+.paper-nav a {
+  color: var(--paper-soft);
+}
+
+.post-header {
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--paper-rule);
+}
+
+.post-date {
+  margin-bottom: var(--space-2);
+  color: var(--paper-soft);
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  text-transform: uppercase;
+}
+
+.paper .post-header h1 {
+  max-width: 16ch;
+  color: var(--paper-ink);
+  font-size: clamp(2rem, 8vw, 2.2rem);
+  text-shadow: none;
+}
+
+.post-dek {
+  margin-bottom: 0;
+  color: var(--paper-soft);
+  font-family: var(--font-serif);
+  font-size: var(--step-3);
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.post-body {
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
+
+.post-body p,
+.post-body li,
+.post-body blockquote {
+  text-wrap: pretty;
+}
+
+.post-body p,
+.post-body ul,
+.post-body ol,
+.post-body blockquote,
+.post-body pre {
+  margin: 0 0 var(--space-3);
+}
+
+.post-body h2,
+.post-body h3 {
+  margin: var(--space-5) 0 var(--space-2);
+  color: var(--paper-ink);
+  font-family: var(--font-serif);
+  font-weight: 650;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.post-body h2 {
+  font-size: 1.45rem;
+}
+
+.post-body h3 {
+  font-size: 1.25rem;
+}
+
+.post-body blockquote {
+  padding-left: var(--space-3);
+  border-left: 3px solid var(--gold);
+  color: var(--paper-ink);
+}
+
+.post-body blockquote p {
+  margin-bottom: 0;
+}
+
+.post-body code {
+  border-radius: 3px;
+  background: rgba(29, 28, 26, 0.07);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  padding: 0.08rem 0.28rem;
+}
+
+.post-body pre {
+  overflow-x: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--paper-rule);
+  background: rgba(29, 28, 26, 0.05);
+}
+
+.post-body pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.post-body img,
+.post-body figure {
+  max-width: 100%;
+}
+
+.post-body figcaption {
+  color: var(--paper-soft);
+  font-size: 0.9rem;
+}
+
+.post-footer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--paper-rule);
+  color: var(--paper-soft);
+  font-size: var(--step-1);
+}
+
 @media (max-width: 980px) {
   .hero {
     min-height: auto;
@@ -485,10 +727,36 @@ h1 {
     word-break: break-word;
   }
 
+  .paper {
+    font-size: 17px;
+  }
+
+  .paper-shell {
+    padding: var(--space-4) 1rem var(--space-6);
+  }
+
+  .post-body {
+    font-size: 1.0625rem;
+  }
+
+  .post-body pre {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+
   .project-list article,
-  .ledger article {
+  .ledger article,
+  .writing-list li {
     grid-template-columns: 1fr;
     gap: 0.45rem;
+  }
+
+  .writing-list p {
+    grid-column: 1;
+    margin-top: 0;
   }
 
   .folio-section {
