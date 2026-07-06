@@ -1,5 +1,5 @@
 ---
-title: The Astro Teller post
+title: Moonshot Compost
 date: 2026-03-24
 dek: Astro Teller says "most of why we waste time at work is fear."
 tags:

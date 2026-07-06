@@ -392,6 +392,15 @@ h1 {
   color: var(--text);
 }
 
+.ledger .record-summary {
+  max-width: 43rem;
+  margin: 0.55rem 0 0;
+  color: var(--text-soft);
+  font-size: var(--step-2);
+  line-height: 1.58;
+  text-shadow: 0 1px 14px rgba(11, 12, 14, 0.95);
+}
+
 .ledger blockquote {
   margin: 0.7rem 0 0;
   padding: 0 0 0 1.05rem;
