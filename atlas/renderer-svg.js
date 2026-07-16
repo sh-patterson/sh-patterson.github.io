@@ -40,6 +40,7 @@ export class SvgAtlasRenderer {
     svg.setAttribute("viewBox", viewBox);
     svg.setAttribute("preserveAspectRatio", options.preserveAspectRatio ?? "xMidYMid meet");
     svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
     for (const state of geometry.states) {
       const path = document.createElementNS(SVG_NS, "path");
       path.setAttribute("d", state.path);

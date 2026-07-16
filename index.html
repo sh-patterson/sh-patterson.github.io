@@ -74,95 +74,148 @@
             </nav>
         </header>
 
-        <section class="folio-section" aria-labelledby="work-title">
-            <div class="folio-inner">
-            <h2 id="work-title">Selected work</h2>
-            <div class="ledger">
-                <article>
+        <section id="career-atlas" class="folio-section career-atlas" aria-labelledby="work-title" data-career-atlas>
+            <div class="atlas-shell">
+                <header class="atlas-header">
+                    <div>
+                        <p class="atlas-kicker">Field Atlas / 2017&mdash;Present</p>
+                        <h2 id="work-title">Selected work</h2>
+                    </div>
+                    <p class="atlas-thesis">Proof has a geography.</p>
+                </header>
+
+                <div class="atlas-interface" aria-label="Career field atlas">
+                    <fieldset class="atlas-year-rail">
+                        <legend>Cycle</legend>
+                        <div class="atlas-year-options">
+                            <label><input type="radio" name="career-year" value="Overview" checked> <span>Overview</span></label>
+                            <label><input type="radio" name="career-year" value="2018"> <span>2018</span></label>
+                            <label><input type="radio" name="career-year" value="2020"> <span>2020</span></label>
+                            <label><input type="radio" name="career-year" value="2022"> <span>2022</span></label>
+                            <label><input type="radio" name="career-year" value="2023"> <span>2023</span></label>
+                            <label><input type="radio" name="career-year" value="2024"> <span>2024</span></label>
+                            <label><input type="radio" name="career-year" value="2026"> <span>2026</span></label>
+                        </div>
+                    </fieldset>
+
+                    <div class="atlas-workbench">
+                        <div class="atlas-map-column">
+                            <div class="atlas-map-stage" data-atlas-map-stage>
+                                <svg class="atlas-svg" data-atlas-svg aria-hidden="true" focusable="false"></svg>
+                                <canvas class="atlas-webgl" data-atlas-webgl aria-hidden="true"></canvas>
+                                <span class="atlas-selection-anchor" data-atlas-anchor aria-hidden="true"></span>
+                            </div>
+                            <div class="atlas-map-meta">
+                                <div class="atlas-legend" aria-label="Map legend">
+                                    <span><i class="legend-swatch legend-active"></i>Assignment</span>
+                                    <span><i class="legend-swatch legend-multi"></i>Multiple cycles</span>
+                                    <span><i class="legend-swatch legend-coverage"></i>Coverage only</span>
+                                </div>
+                                <p class="atlas-renderer-status" aria-live="polite">Renderer: awaiting activation</p>
+                            </div>
+                        </div>
+
+                        <aside class="atlas-index" aria-labelledby="atlas-states-title">
+                            <div class="atlas-index-heading">
+                                <h3 id="atlas-states-title">Active states</h3>
+                                <span data-atlas-count></span>
+                            </div>
+                            <div class="atlas-state-list" data-atlas-state-list></div>
+                            <label class="atlas-effects">
+                                <input type="checkbox" data-atlas-effects>
+                                <span>Reduce effects</span>
+                            </label>
+                        </aside>
+                    </div>
+
+                    <div class="atlas-case-file" data-atlas-case popover="auto" aria-live="polite">
+                        <button class="atlas-case-close" type="button" data-atlas-close aria-label="Close case file">Close</button>
+                        <div data-atlas-case-content></div>
+                    </div>
+                </div>
+
+                <details class="atlas-ledger" open>
+                    <summary>Full career ledger</summary>
+                    <div class="ledger">
+<!-- career-atlas:start -->
+                <article id="career-2026-ca" data-career-id="2026-ca-becerra" data-career-year="2026" data-career-state="CA" data-career-states="CA">
+                    <div class="record-date">2026</div>
+                    <div>
+                        <h3>Becerra for Governor / Research Consultant</h3>
+                        <p class="record-summary">I served as a research consultant on Xavier Becerra&#39;s campaign for governor during a late surge from single-digit polling to first place in California&#39;s top-two primary and a spot on the November ballot.</p>
+                        <blockquote>
+                            <span class="receipt-label">Receipt</span>
+                            <p>the everyday miracle of living in a state that regularly makes the improbable seem inevitable.</p>
+                            <cite><a href="https://calmatters.org/politics/2026/06/california-primary-governor-becerra/">Xavier Becerra via CalMatters</a></cite>
+                        </blockquote>
+                    </div>
+                </article>
+                <article id="career-2024-az" data-career-id="2024-az-gallego" data-career-year="2024" data-career-state="AZ" data-career-states="AZ">
                     <div class="record-date">2024</div>
                     <div>
                         <h3>Gallego for Senate / Research Director</h3>
-                        <p class="record-summary">
-                            I directed the core research operation for a top-tier
-                            battleground state. My team managed full-scale contingency
-                            planning, conducted legal and property audits, and built a
-                            rapid-response department that secured over 20 successful
-                            fact-checks against multi-million-dollar attack ads.
-                        </p>
+                        <p class="record-summary">I directed the core research operation for a top-tier battleground state. My team managed full-scale contingency planning, conducted legal and property audits, and built a rapid-response department that secured over 20 successful fact-checks against multi-million-dollar attack ads.</p>
                         <blockquote>
+                            <span class="receipt-label">Receipt</span>
                             <p>Ruben Gallego outperformed Harris, dominated with Latinos and won Arizona.</p>
                             <cite><a href="https://www.nbcnews.com/politics/2024-elections/arizona-senate-results">NBC News</a></cite>
                         </blockquote>
                     </div>
                 </article>
-                <article>
+                <article id="career-2023-ms" data-career-id="2023-ms-presley" data-career-year="2023" data-career-state="MS" data-career-states="MS">
                     <div class="record-date">2023</div>
                     <div>
                         <h3>Presley for Governor / Research and Policy Director</h3>
-                        <p class="record-summary">
-                            I ran a dual-desk campaign war room, authoring a comprehensive
-                            policy platform while deploying custom AI scrapers to convert
-                            20 years of scanned paper records into digital datasets linking
-                            travel logs and state contracts to a public corruption narrative.
-                        </p>
+                        <p class="record-summary">I ran a dual-desk campaign war room, authoring a comprehensive policy platform while deploying custom AI scrapers to convert 20 years of scanned paper records into digital datasets linking travel logs and state contracts to a public corruption narrative.</p>
                         <blockquote>
-                            <p>Final election results: 2023 was the closest Mississippi governor's race since 1999.</p>
+                            <span class="receipt-label">Receipt</span>
+                            <p>Final election results: 2023 was the closest Mississippi governor&#39;s race since 1999.</p>
                             <cite><a href="https://mississippitoday.org/2023/11/22/final-election-results-2023-mississippi-governors-race/">Mississippi Today</a></cite>
                         </blockquote>
                     </div>
                 </article>
-                <article>
-                    <div class="record-date">2021&ndash;22</div>
+                <article id="career-2022-nv" data-career-id="2022-dccc-rocky-mountains" data-career-year="2022" data-career-state="NV" data-career-states="NV OR WA KS NE AZ MT">
+                    <div class="record-date">2022</div>
                     <div>
                         <h3>DCCC / Regional Research Director: Rocky Mountains</h3>
-                        <p class="record-summary">
-                            I planned and executed opposition research and rapid-response
-                            efforts across 13 competitive campaigns in 7 states, including
-                            8 House incumbents. I oversaw the deployment of trackers and
-                            analysts, bridging siloed research sectors into a unified
-                            counter-offensive to secure crucial late-stage national investments.
-                        </p>
+                        <p class="record-summary">I directed opposition research and rapid response across nine toss-up districts in five core states. The portfolio won seven of nine; the broader region also included Montana and off-year coverage in Arizona.</p>
+                        <p class="record-roster"><strong>Assignments:</strong> NV-01, NV-03, NV-04, OR-04, OR-05, OR-06, WA-08, KS-03, NE-02</p>
+                        <p class="record-coverage"><strong>Additional coverage:</strong> Arizona off-year coverage (no result claim); Montana regional coverage (no result claim).</p>
                         <blockquote>
+                            <span class="receipt-label">Cycle Receipt</span>
                             <p>No Democratic president with control of the Senate has ever duplicated the achievement of picking up Senate seats, or even holding steady, in a midterm election. Until now?</p>
                             <cite><a href="https://www.theatlantic.com/newsletters/archive/2022/11/democrats-biggest-midterm-shock-polls/672055/">The Atlantic</a></cite>
                         </blockquote>
                     </div>
                 </article>
-                <article>
-                    <div class="record-date">2019&ndash;21</div>
+                <article id="career-2020-ga" data-career-id="2020-dscc-senate-portfolio" data-career-year="2020" data-career-state="GA" data-career-states="GA IA KS MI NH">
+                    <div class="record-date">2020</div>
                     <div>
                         <h3>DSCC / Research Associate: Independent Expenditure &amp; Coordinated</h3>
-                        <p class="record-summary">
-                            I wrote comprehensive opposition research books on major
-                            tier-one incumbents, managed multi-state tracking programs,
-                            and drafted factual research backups for over 20 media
-                            placements across high-consequence Senate targets, including
-                            the historic Georgia and Arizona battlegrounds.
-                        </p>
+                        <p class="record-summary">I wrote comprehensive opposition research books on major tier-one incumbents, managed multi-state tracking programs, and drafted factual research backups for more than 20 media placements across Georgia, Iowa, Kansas, Michigan, and New Hampshire, with Georgia and Iowa as my largest assignments.</p>
+                        <p class="record-roster"><strong>Assignments:</strong> GA, IA, KS, MI, NH</p>
                         <blockquote>
+                            <span class="receipt-label">Cycle Receipt</span>
                             <p>Democrats won both Georgia Senate seats and with them, the U.S. Senate majority, serving President Donald Trump a stunning defeat in his last days in office.</p>
                             <cite><a href="https://www.pbs.org/newshour/politics/ossoff-wins-in-georgia-tipping-senate-control-to-democrats">AP via PBS NewsHour</a></cite>
                         </blockquote>
                     </div>
                 </article>
-                <article>
-                    <div class="record-date">2017&ndash;18</div>
+                <article id="career-2018-wv" data-career-id="2018-wv-manchin" data-career-year="2018" data-career-state="WV" data-career-states="WV">
+                    <div class="record-date">2018</div>
                     <div>
-                        <h3>Joe Manchin for West Virginia / Research Analyst and Tracker</h3>
-                        <p class="record-summary">
-                            I executed embedded video research and rapid-response
-                            operations directly from the trail in a high-exposure defense
-                            cycle, authoring the debate briefings, tracking opponent event
-                            vulnerabilities, and intercepting hostile media pitches in the
-                            heart of Trump country.
-                        </p>
+                        <h3>Joe Manchin for Senate / Research Analyst and Tracker</h3>
+                        <p class="record-summary">I executed embedded video research and rapid-response operations directly from the trail in a high-exposure defense cycle, authoring the debate briefings, tracking opponent event vulnerabilities, and intercepting hostile media pitches in the heart of Trump country.</p>
                         <blockquote>
+                            <span class="receipt-label">Receipt</span>
                             <p>Democratic Sen. Joe Manchin has won re-election in West Virginia in the heart of Trump country, dispatching Republican state Attorney General Patrick Morrisey.</p>
                             <cite><a href="https://rollcall.com/2018/11/06/west-virginias-joe-manchin-stays-put-in-trump-country/">Roll Call</a></cite>
                         </blockquote>
                     </div>
                 </article>
-            </div>
+<!-- career-atlas:end -->
+                    </div>
+                </details>
             </div>
         </section>
 
@@ -258,7 +311,7 @@
 
         <footer class="site-footer">
             <div class="folio-inner">
-                <span>Revised 2026-05-12.</span>
+                <span>Revised 2026-07-16.</span>
             </div>
         </footer>
     </main>

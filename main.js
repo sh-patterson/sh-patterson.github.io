@@ -422,3 +422,40 @@
   updateScrollProgress();
   scheduleDraw();
 })();
+
+(() => {
+  const root = document.querySelector("[data-career-atlas]");
+  if (!root) return;
+
+  let requested = false;
+  const loadAtlas = async () => {
+    if (requested) return;
+    requested = true;
+    try {
+      const { mountCareerAtlas } = await import("./atlas/index.js");
+      mountCareerAtlas(root);
+    } catch (error) {
+      root.dispatchEvent(new CustomEvent("career-atlas:error", {
+        bubbles: true,
+        detail: { error },
+      }));
+    }
+  };
+
+  requestAnimationFrame(() => {
+    if (window.location.hash.startsWith("#career-")) {
+      loadAtlas();
+      return;
+    }
+    if (!("IntersectionObserver" in window)) {
+      loadAtlas();
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      loadAtlas();
+    }, { rootMargin: "800px 0px" });
+    observer.observe(root);
+  });
+})();

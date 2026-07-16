@@ -59,23 +59,31 @@ test("selector forces SVG for accessibility and data constraints", () => {
   assert.equal(selectRendererMode({ mode: "webgpu" }, environment()), ATLAS_RENDERERS.SVG);
 });
 
-test("SVG renderer creates context paths and updates classes without text", () => {
+test("SVG renderer stays decorative and encodes exact multi-year combinations", () => {
   const svg = fakeSvg();
   const renderer = createRenderer({ mode: "svg" }, environment());
   assert.equal(renderer.init({ svg }, geometry), ATLAS_RENDERERS.SVG);
   renderer.render({
-    activeStates: { AA: { year: 2024, scope: "field-work" } },
+    activeStates: {
+      AA: { year: "2020-2022", scope: "multi-year" },
+      BB: { year: "2022-2024", scope: "multi-year" },
+    },
     selectedState: "AA",
   });
   const group = svg.children[0];
+  assert.equal(svg.getAttribute("aria-hidden"), "true");
+  assert.equal(svg.getAttribute("focusable"), "false");
   assert.equal(group.getAttribute("aria-hidden"), "true");
   assert.equal(group.children.length, 2);
   assert.equal(group.children.some((child) => child.tagName === "text"), false);
   assert.match(group.children[0].getAttribute("class"), /is-active/);
   assert.match(group.children[0].getAttribute("class"), /is-selected/);
-  assert.match(group.children[0].getAttribute("class"), /atlas-year-2024/);
-  assert.match(group.children[0].getAttribute("class"), /atlas-scope-field-work/);
+  assert.match(group.children[0].getAttribute("class"), /atlas-year-2020-2022/);
+  assert.match(group.children[0].getAttribute("class"), /atlas-scope-multi-year/);
+  assert.equal(group.children[0].getAttribute("data-year"), "2020-2022");
   assert.equal(group.children[0].getAttribute("data-state"), "AA");
+  assert.match(group.children[1].getAttribute("class"), /atlas-year-2022-2024/);
+  assert.equal(group.children[1].getAttribute("data-year"), "2022-2024");
   renderer.destroy();
   assert.equal(svg.children.length, 0);
 });
