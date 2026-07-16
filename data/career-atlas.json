@@ -1,0 +1,213 @@
+{
+  "years": [
+    "Overview",
+    "2018",
+    "2020",
+    "2022",
+    "2023",
+    "2024",
+    "2026"
+  ],
+  "receipts": [
+    {
+      "id": "receipt-2018-manchin",
+      "kind": "receipt",
+      "quote": "Democratic Sen. Joe Manchin has won re-election in West Virginia in the heart of Trump country, dispatching Republican state Attorney General Patrick Morrisey.",
+      "attribution": "Roll Call",
+      "url": "https://rollcall.com/2018/11/06/west-virginias-joe-manchin-stays-put-in-trump-country/"
+    },
+    {
+      "id": "receipt-2020-dscc",
+      "kind": "cycle-receipt",
+      "quote": "Democrats won both Georgia Senate seats and with them, the U.S. Senate majority, serving President Donald Trump a stunning defeat in his last days in office.",
+      "attribution": "AP via PBS NewsHour",
+      "url": "https://www.pbs.org/newshour/politics/ossoff-wins-in-georgia-tipping-senate-control-to-democrats"
+    },
+    {
+      "id": "receipt-2022-dccc",
+      "kind": "cycle-receipt",
+      "quote": "No Democratic president with control of the Senate has ever duplicated the achievement of picking up Senate seats, or even holding steady, in a midterm election. Until now?",
+      "attribution": "The Atlantic",
+      "url": "https://www.theatlantic.com/newsletters/archive/2022/11/democrats-biggest-midterm-shock-polls/672055/"
+    },
+    {
+      "id": "receipt-2023-presley",
+      "kind": "receipt",
+      "quote": "Final election results: 2023 was the closest Mississippi governor's race since 1999.",
+      "attribution": "Mississippi Today",
+      "url": "https://mississippitoday.org/2023/11/22/final-election-results-2023-mississippi-governors-race/"
+    },
+    {
+      "id": "receipt-2024-gallego",
+      "kind": "receipt",
+      "quote": "Ruben Gallego outperformed Harris, dominated with Latinos and won Arizona.",
+      "attribution": "NBC News",
+      "url": "https://www.nbcnews.com/politics/2024-elections/arizona-senate-results"
+    },
+    {
+      "id": "receipt-2026-becerra",
+      "kind": "receipt",
+      "quote": "the everyday miracle of living in a state that regularly makes the improbable seem inevitable.",
+      "attribution": "Xavier Becerra via CalMatters",
+      "url": "https://calmatters.org/politics/2026/06/california-primary-governor-becerra/"
+    }
+  ],
+  "records": [
+    {
+      "id": "2018-wv-manchin",
+      "year": "2018",
+      "state": "WV",
+      "organization": "Joe Manchin for Senate",
+      "campaign": "Joe Manchin for Senate",
+      "role": "Research Analyst and Tracker",
+      "summary": "I executed embedded video research and rapid-response operations directly from the trail in a high-exposure defense cycle, authoring the debate briefings, tracking opponent event vulnerabilities, and intercepting hostile media pitches in the heart of Trump country.",
+      "scopeType": "campaign",
+      "roster": [],
+      "outcome": "Won re-election in West Virginia.",
+      "resultType": "win",
+      "receiptId": "receipt-2018-manchin",
+      "evidenceNote": "Embedded video research and rapid response on the campaign trail."
+    },
+    {
+      "id": "2020-dscc-senate-portfolio",
+      "year": "2020",
+      "state": "GA",
+      "organization": "DSCC",
+      "campaign": "Independent Expenditure & Coordinated",
+      "role": "Research Associate: Independent Expenditure & Coordinated",
+      "summary": "I wrote comprehensive opposition research books on major tier-one incumbents, managed multi-state tracking programs, and drafted factual research backups for more than 20 media placements across Georgia, Iowa, Kansas, Michigan, and New Hampshire, with Georgia and Iowa as my largest assignments.",
+      "scopeType": "portfolio",
+      "roster": [
+        "GA",
+        "IA",
+        "KS",
+        "MI",
+        "NH"
+      ],
+      "outcome": {
+        "summary": "Georgia and Iowa were the primary focus within a five-state Senate portfolio.",
+        "stateClaims": {
+          "GA": "Democrats won both Georgia Senate seats and the Senate majority."
+        }
+      },
+      "resultType": "portfolio-result",
+      "receiptId": "receipt-2020-dscc",
+      "evidenceNote": "The two-seat victory claim applies only to Georgia; no result claim is made for Iowa, Kansas, Michigan, or New Hampshire."
+    },
+    {
+      "id": "2022-dccc-rocky-mountains",
+      "year": "2022",
+      "state": "NV",
+      "organization": "DCCC",
+      "campaign": "Rocky Mountains region",
+      "role": "Regional Research Director: Rocky Mountains",
+      "summary": "I directed opposition research and rapid response across nine toss-up districts in five core states. The portfolio won seven of nine; the broader region also included Montana and off-year coverage in Arizona.",
+      "scopeType": "portfolio",
+      "roster": [
+        "NV-01",
+        "NV-03",
+        "NV-04",
+        "OR-04",
+        "OR-05",
+        "OR-06",
+        "WA-08",
+        "KS-03",
+        "NE-02"
+      ],
+      "outcome": {
+        "summary": "Seven wins across nine toss-up assignments.",
+        "wins": [
+          "NV-01",
+          "NV-03",
+          "NV-04",
+          "OR-04",
+          "OR-06",
+          "WA-08",
+          "KS-03"
+        ],
+        "losses": [
+          "OR-05",
+          "NE-02"
+        ]
+      },
+      "resultType": "portfolio-result",
+      "receiptId": "receipt-2022-dccc",
+      "evidenceNote": "Core states were Nevada, Oregon, Washington, Kansas, and Nebraska."
+    },
+    {
+      "id": "2022-dccc-arizona-coverage",
+      "year": "2022",
+      "state": "AZ",
+      "organization": "DCCC",
+      "campaign": "Arizona off-year coverage",
+      "role": "Regional Research Director: Rocky Mountains",
+      "summary": "Arizona off-year coverage assignment only; no electoral result claim.",
+      "scopeType": "off-year-coverage",
+      "roster": [],
+      "outcome": null,
+      "resultType": "no-claim",
+      "receiptId": null,
+      "evidenceNote": "Coverage assignment only; no electoral result claim."
+    },
+    {
+      "id": "2022-dccc-montana-coverage",
+      "year": "2022",
+      "state": "MT",
+      "organization": "DCCC",
+      "campaign": "Montana regional coverage",
+      "role": "Regional Research Director: Rocky Mountains",
+      "summary": "Montana regional coverage assignment only; no electoral result claim.",
+      "scopeType": "regional-coverage",
+      "roster": [],
+      "outcome": null,
+      "resultType": "no-claim",
+      "receiptId": null,
+      "evidenceNote": "Coverage assignment only; no electoral result claim."
+    },
+    {
+      "id": "2023-ms-presley",
+      "year": "2023",
+      "state": "MS",
+      "organization": "Presley for Governor",
+      "campaign": "Brandon Presley for Governor",
+      "role": "Research and Policy Director",
+      "summary": "I ran a dual-desk campaign war room, authoring a comprehensive policy platform while deploying custom AI scrapers to convert 20 years of scanned paper records into digital datasets linking travel logs and state contracts to a public corruption narrative.",
+      "scopeType": "campaign",
+      "roster": [],
+      "outcome": "The closest Mississippi governor's race since 1999.",
+      "resultType": "loss",
+      "receiptId": "receipt-2023-presley",
+      "evidenceNote": "Research and policy leadership for the statewide campaign."
+    },
+    {
+      "id": "2024-az-gallego",
+      "year": "2024",
+      "state": "AZ",
+      "organization": "Gallego for Senate",
+      "campaign": "Ruben Gallego for Senate",
+      "role": "Research Director",
+      "summary": "I directed the core research operation for a top-tier battleground state. My team managed full-scale contingency planning, conducted legal and property audits, and built a rapid-response department that secured over 20 successful fact-checks against multi-million-dollar attack ads.",
+      "scopeType": "campaign",
+      "roster": [],
+      "outcome": "Won Arizona's U.S. Senate race.",
+      "resultType": "win",
+      "receiptId": "receipt-2024-gallego",
+      "evidenceNote": "Directed the campaign's core research operation."
+    },
+    {
+      "id": "2026-ca-becerra",
+      "year": "2026",
+      "state": "CA",
+      "organization": "Becerra for Governor",
+      "campaign": "Xavier Becerra for Governor",
+      "role": "Research Consultant",
+      "summary": "I served as a research consultant on Xavier Becerra's campaign for governor during a late surge from single-digit polling to first place in California's top-two primary and a spot on the November ballot.",
+      "scopeType": "campaign",
+      "roster": [],
+      "outcome": "Advanced after finishing first in California's top-two primary.",
+      "resultType": "advanced",
+      "receiptId": "receipt-2026-becerra",
+      "evidenceNote": "Research consulting for the statewide gubernatorial campaign."
+    }
+  ]
+}

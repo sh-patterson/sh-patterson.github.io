@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:atlas": "node scripts/build-career-atlas.mjs --write",
+    "check:atlas": "node scripts/build-career-atlas.mjs --check",
     "build:writing": "node scripts/build-writing.mjs",
     "check:writing": "node scripts/build-writing.mjs --check",
     "check:links": "node scripts/site-qa.mjs links",
