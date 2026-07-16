@@ -191,7 +191,10 @@ async function startStaticServer() {
   const { port } = server.address();
   return {
     url: `http://127.0.0.1:${port}/`,
-    close: () => new Promise((resolve) => server.close(resolve)),
+    close: () => new Promise((resolve) => {
+      server.closeAllConnections?.();
+      server.close(resolve);
+    }),
   };
 }
 
@@ -289,8 +292,162 @@ async function withBrowser(callback) {
     return await callback(server.url, browser.port);
   } finally {
     browser.chrome.kill();
+    await new Promise((resolve) => {
+      if (browser.chrome.exitCode !== null) {
+        resolve();
+        return;
+      }
+      const timer = setTimeout(resolve, 1500);
+      browser.chrome.once("exit", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+    if (browser.chrome.exitCode === null) browser.chrome.kill("SIGKILL");
     await server.close();
   }
+}
+
+function same(actual, expected, label) {
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    fail(`${label}: expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
+  }
+}
+
+function check(condition, message) {
+  if (!condition) fail(message);
+}
+
+async function evaluate(page, expression) {
+  const response = await page.send("Runtime.evaluate", {
+    expression,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  if (response.exceptionDetails) fail(`Browser evaluation failed: ${response.exceptionDetails.text}`);
+  return response.result?.value;
+}
+
+async function waitForExpression(page, expression, label, timeout = 12000) {
+  const deadline = Date.now() + timeout;
+  while (Date.now() < deadline) {
+    if (await evaluate(page, expression)) return;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  fail(`${label}: timed out`);
+}
+
+async function capture(page, filename) {
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  const screenshot = await page.send("Page.captureScreenshot", { format: "png", fromSurface: true });
+  const screenshotPath = path.join(tmpdir(), filename);
+  await writeFile(screenshotPath, Buffer.from(screenshot.data, "base64"));
+  return screenshotPath;
+}
+
+function runtimeProblems(page) {
+  return page.events
+    .filter((event) => event.method === "Runtime.exceptionThrown" ||
+      (event.method === "Log.entryAdded" && event.params?.entry?.level === "error"))
+    .map((event) => event.params);
+}
+
+function thirdPartyRequests(page, baseUrl) {
+  const localOrigin = new URL(baseUrl).origin;
+  return page.events
+    .filter((event) => event.method === "Network.requestWillBeSent")
+    .map((event) => event.params?.request?.url)
+    .filter(Boolean)
+    .filter((url) => {
+      if (url === "about:blank" || url.startsWith("data:") || url.startsWith("blob:")) return false;
+      try {
+        return new URL(url).origin !== localOrigin;
+      } catch {
+        return false;
+      }
+    });
+}
+
+const atlasEventCapture = `(() => {
+  window.__atlasQaErrors = [];
+  document.addEventListener("career-atlas:error", (event) => {
+    window.__atlasQaErrors.push(String(event.detail?.error?.message || event.detail?.error || "unknown atlas error"));
+  });
+})();`;
+
+async function openAtlasPage(baseUrl, chromePort, label, options = {}) {
+  const page = await newPage(chromePort);
+  await page.send("Page.enable");
+  await page.send("Network.enable");
+  await page.send("Runtime.enable");
+  await page.send("Log.enable");
+  await page.send("Emulation.setDeviceMetricsOverride", options.metrics ?? {
+    width: 1440,
+    height: 1100,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  if (options.media) await page.send("Emulation.setEmulatedMedia", options.media);
+  if (options.scriptDisabled) await page.send("Emulation.setScriptExecutionDisabled", { value: true });
+  if (!options.scriptDisabled) {
+    await page.send("Page.addScriptToEvaluateOnNewDocument", {
+      source: `${atlasEventCapture}\n${options.preload ?? ""}`,
+    });
+  }
+  await page.send("Page.navigate", { url: `${baseUrl}${options.hash ?? ""}` });
+  await page.waitFor("Page.loadEventFired");
+  if (options.scriptDisabled) {
+    await page.send("Emulation.setScriptExecutionDisabled", { value: false });
+  }
+  return { page, label, baseUrl };
+}
+
+async function closeAtlasPage(context, options = {}) {
+  const { page, label, baseUrl } = context;
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  const problems = runtimeProblems(page);
+  const external = thirdPartyRequests(page, baseUrl);
+  const atlasErrors = options.scriptDisabled ? [] : await evaluate(page, "window.__atlasQaErrors || []");
+  if (problems.length) fail(`${label}: console/runtime errors: ${JSON.stringify(problems.slice(0, 3))}`);
+  if (external.length) fail(`${label}: third-party runtime requests: ${external.join(", ")}`);
+  if (options.atlasError) {
+    check(atlasErrors.some((message) => options.atlasError.test(message)),
+      `${label}: expected atlas error ${options.atlasError}, received ${JSON.stringify(atlasErrors)}`);
+  } else if (atlasErrors.length) {
+    fail(`${label}: unexpected atlas errors: ${JSON.stringify(atlasErrors)}`);
+  }
+  await page.send("Page.close").catch(() => {});
+  page.close();
+}
+
+async function scrollToAtlas(page, label) {
+  await evaluate(page, `document.querySelector("[data-career-atlas]").scrollIntoView({ block: "start" }); true`);
+  await waitForExpression(page, `document.querySelector("[data-career-atlas]")?.dataset.mounted === "true"`, `${label}: atlas mount`);
+}
+
+async function atlasOverflow(page) {
+  return evaluate(page, `(() => {
+    const root = document.querySelector("[data-career-atlas]");
+    const overflowing = [...root.querySelectorAll("*")].filter((element) => {
+      const style = getComputedStyle(element);
+      if (style.display === "none" || style.visibility === "hidden") return false;
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && (rect.left < -1 || rect.right > innerWidth + 1);
+    }).map((element) => ({
+      tag: element.tagName.toLowerCase(),
+      className: typeof element.className === "string" ? element.className : element.getAttribute("class") || "",
+      left: Math.round(element.getBoundingClientRect().left),
+      right: Math.round(element.getBoundingClientRect().right),
+    }));
+    return { overflowing, rootScrollWidth: root.scrollWidth, rootClientWidth: root.clientWidth };
+  })()`);
+}
+
+async function assertAtlasNoOverflow(page, label) {
+  const result = await atlasOverflow(page);
+  check(result.rootScrollWidth <= result.rootClientWidth + 1,
+    `${label}: atlas root overflows ${result.rootScrollWidth}px > ${result.rootClientWidth}px`);
+  check(!result.overflowing.length, `${label}: atlas elements overflow viewport: ${JSON.stringify(result.overflowing)}`);
 }
 
 async function renderCase(baseUrl, chromePort, label, metrics) {
@@ -375,6 +532,244 @@ async function smokeRender() {
   for (const result of results) console.log(`${result.label} render passed: ${result.screenshotPath}`);
 }
 
+async function smokeAtlas() {
+  const screenshots = await withBrowser(async (baseUrl, chromePort) => {
+    const paths = {};
+
+    const desktop = await openAtlasPage(baseUrl, chromePort, "atlas desktop overview");
+    await scrollToAtlas(desktop.page, desktop.label);
+    const overview = await evaluate(desktop.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      const ledger = root.querySelector(".atlas-ledger");
+      return {
+        pathCount: root.querySelectorAll("[data-atlas-svg] path[data-state]").length,
+        buttonCount: root.querySelectorAll("[data-atlas-state-list] button[data-state]").length,
+        interfaceVisible: getComputedStyle(root.querySelector(".atlas-interface")).display !== "none",
+        ledgerOpen: ledger.open,
+        ledgerVisible: getComputedStyle(ledger).display !== "none",
+        year: root.dataset.year,
+      };
+    })()`);
+    same(overview, {
+      pathCount: 50,
+      buttonCount: 14,
+      interfaceVisible: true,
+      ledgerOpen: false,
+      ledgerVisible: true,
+      year: "Overview",
+    }, "atlas desktop overview mount");
+    await assertAtlasNoOverflow(desktop.page, "atlas desktop after mount");
+    paths.desktopOverview = await capture(desktop.page, "sh-patterson-atlas-desktop-overview.png");
+
+    await evaluate(desktop.page, `document.querySelector('input[name="career-year"][value="2022"]').click(); true`);
+    await waitForExpression(desktop.page, `document.querySelector("[data-career-atlas]")?.dataset.year === "2022"`, "atlas 2022 selection");
+    const stateCodes = await evaluate(desktop.page, `[...document.querySelectorAll("[data-atlas-state-list] button[data-state]")].map((button) => button.dataset.state)`);
+    same(stateCodes, ["AZ", "KS", "MT", "NE", "NV", "OR", "WA"], "atlas 2022 state list");
+    await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
+    await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon case open");
+    const oregon = await evaluate(desktop.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      const caseFile = root.querySelector("[data-atlas-case]");
+      return {
+        header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
+        recordCount: caseFile.querySelectorAll(".case-record").length,
+        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^State evidence:\\s*/, "").trim(),
+        receiptLabel: caseFile.querySelector(".receipt-label")?.textContent.trim(),
+        hash: location.hash,
+      };
+    })()`);
+    same(oregon, {
+      header: "Oregon / 2022",
+      recordCount: 1,
+      evidence: "3 assignments: OR-04, OR-05, OR-06. 2 wins, 1 loss.",
+      receiptLabel: "Cycle Receipt",
+      hash: "#career-2022-or",
+    }, "atlas Oregon evidence");
+    await assertAtlasNoOverflow(desktop.page, "atlas desktop with case file");
+    paths.desktopOregon = await capture(desktop.page, "sh-patterson-atlas-desktop-oregon.png");
+
+    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
+    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
+    await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas Escape focus restoration");
+    await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
+    await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon reopen");
+    await evaluate(desktop.page, `document.querySelector("[data-atlas-close]").click(); true`);
+    await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas Close focus restoration");
+
+    await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="AZ"]').click(); true`);
+    await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Arizona case open");
+    const arizona = await evaluate(desktop.page, `(() => {
+      const caseFile = document.querySelector("[data-atlas-case]");
+      return {
+        recordCount: caseFile.querySelectorAll(".case-record").length,
+        header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
+        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^State evidence:\\s*/, "").trim(),
+        receiptLabel: caseFile.querySelector(".receipt-label")?.textContent.trim(),
+        text: caseFile.textContent.replace(/\\s+/g, " ").trim(),
+      };
+    })()`);
+    check(arizona.recordCount === 1 && arizona.header === "Arizona / 2022", "atlas Arizona must contain only its 2022 coverage record");
+    check(arizona.evidence === "Arizona was a coverage assignment only. No electoral result claim is made.", "atlas Arizona must make no result claim");
+    check(arizona.receiptLabel === "Cycle Receipt · cycle context, not a state result", "atlas Arizona must contextualize its cycle receipt");
+    check(!/won|lost|loss|victory/i.test(arizona.evidence), "atlas Arizona evidence contains a result claim");
+    await closeAtlasPage(desktop);
+
+    const noJs = await openAtlasPage(baseUrl, chromePort, "atlas no-JS", { scriptDisabled: true });
+    const noJsResult = await evaluate(noJs.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      const ledger = root.querySelector(".atlas-ledger");
+      const roster = root.querySelector('[data-career-id="2022-dccc-rocky-mountains"] .record-roster')?.textContent
+        .replace(/^Assignments:\\s*/, "").split(",").map((item) => item.trim());
+      return {
+        interfaceHidden: getComputedStyle(root.querySelector(".atlas-interface")).display === "none",
+        ledgerOpen: ledger.open,
+        ledgerVisible: getComputedStyle(ledger.querySelector(".ledger")).display !== "none",
+        visibleRecords: [...ledger.querySelectorAll("article[data-career-id]")].filter((article) => article.getBoundingClientRect().height > 0).length,
+        roster,
+      };
+    })()`);
+    same(noJsResult, {
+      interfaceHidden: true,
+      ledgerOpen: true,
+      ledgerVisible: true,
+      visibleRecords: 6,
+      roster: ["NV-01", "NV-03", "NV-04", "OR-04", "OR-05", "OR-06", "WA-08", "KS-03", "NE-02"],
+    }, "atlas no-JS fallback");
+    await closeAtlasPage(noJs, { scriptDisabled: true });
+
+    const deepLink = await openAtlasPage(baseUrl, chromePort, "atlas valid deep link", { hash: "#career-2022-or" });
+    await waitForExpression(deepLink.page, `document.querySelector("[data-career-atlas]")?.dataset.mounted === "true"`, "atlas deep-link mount");
+    const deepResult = await evaluate(deepLink.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      const selected = root.querySelector('[data-atlas-state-list] button[data-state="OR"]');
+      const caseFile = root.querySelector("[data-atlas-case]");
+      return {
+        year: root.dataset.year,
+        yearChecked: root.querySelector('input[name="career-year"][value="2022"]').checked,
+        selected: selected?.getAttribute("aria-pressed"),
+        open: caseFile.matches(":popover-open") || caseFile.classList.contains("is-open"),
+        hash: location.hash,
+      };
+    })()`);
+    same(deepResult, { year: "2022", yearChecked: true, selected: "true", open: true, hash: "#career-2022-or" }, "atlas valid deep link");
+    await closeAtlasPage(deepLink);
+
+    const invalidLink = await openAtlasPage(baseUrl, chromePort, "atlas invalid deep link", { hash: "#career-2022-ca" });
+    await waitForExpression(invalidLink.page, `document.querySelector("[data-career-atlas]")?.dataset.mounted === "true"`, "atlas invalid-link mount");
+    const invalidResult = await evaluate(invalidLink.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      const caseFile = root.querySelector("[data-atlas-case]");
+      return {
+        year: root.dataset.year,
+        overviewChecked: root.querySelector('input[name="career-year"][value="Overview"]').checked,
+        pressed: root.querySelectorAll('[data-atlas-state-list] button[aria-pressed="true"]').length,
+        open: caseFile.matches(":popover-open") || caseFile.classList.contains("is-open"),
+      };
+    })()`);
+    same(invalidResult, { year: "Overview", overviewChecked: true, pressed: 0, open: false }, "atlas invalid deep link fallback");
+    await closeAtlasPage(invalidLink);
+
+    const reduced = await openAtlasPage(baseUrl, chromePort, "atlas reduced motion", {
+      media: { features: [{ name: "prefers-reduced-motion", value: "reduce" }] },
+    });
+    await scrollToAtlas(reduced.page, reduced.label);
+    await evaluate(reduced.page, `(() => {
+      window.__qaViewTransitions = 0;
+      if (typeof document.startViewTransition === "function") {
+        const original = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => { window.__qaViewTransitions += 1; return original(...args); };
+      }
+      document.querySelector('input[name="career-year"][value="2022"]').click();
+      return true;
+    })()`);
+    const reducedResult = await evaluate(reduced.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      const webgl = root.querySelector("[data-atlas-webgl]");
+      return {
+        renderer: root.dataset.renderer,
+        checked: root.querySelector("[data-atlas-effects]").checked,
+        reducedClass: root.classList.contains("atlas-reduced-effects"),
+        webglDisplay: getComputedStyle(webgl).display,
+        stateTransition: getComputedStyle(root.querySelector(".atlas-state")).transitionDuration,
+        yearTransition: getComputedStyle(root.querySelector(".atlas-year-options span")).transitionDuration,
+        viewTransitions: window.__qaViewTransitions,
+      };
+    })()`);
+    check(reducedResult.renderer === "svg" && reducedResult.checked && reducedResult.reducedClass, "atlas reduced motion did not force SVG and checked Reduce effects");
+    check(reducedResult.webglDisplay === "none", "atlas reduced motion did not hide the WebGL overlay");
+    const hasNegligibleTransition = (durationList) => durationList.split(",").every((value) => {
+      const duration = value.trim();
+      const magnitude = Number.parseFloat(duration);
+      return duration.endsWith("ms") ? magnitude <= 0.001 : duration.endsWith("s") && magnitude <= 0.000001;
+    });
+    check(hasNegligibleTransition(reducedResult.stateTransition) &&
+      hasNegligibleTransition(reducedResult.yearTransition) && reducedResult.viewTransitions === 0,
+    `atlas reduced motion did not disable map transitions: ${JSON.stringify(reducedResult)}`);
+    await closeAtlasPage(reduced);
+
+    const forcedFailure = await openAtlasPage(baseUrl, chromePort, "atlas forced WebGL failure", {
+      preload: `(() => {
+        Object.defineProperty(window, "WebGL2RenderingContext", { configurable: true, value: function WebGL2RenderingContext() {} });
+        Object.defineProperty(navigator, "hardwareConcurrency", { configurable: true, get: () => 8 });
+        Object.defineProperty(navigator, "deviceMemory", { configurable: true, get: () => 8 });
+        const original = HTMLCanvasElement.prototype.getContext;
+        HTMLCanvasElement.prototype.getContext = function(type, ...args) {
+          if (type === "webgl2") return null;
+          return original.call(this, type, ...args);
+        };
+      })();`,
+    });
+    await scrollToAtlas(forcedFailure.page, forcedFailure.label);
+    const failureResult = await evaluate(forcedFailure.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      return {
+        renderer: root.dataset.renderer,
+        paths: root.querySelectorAll("[data-atlas-svg] path[data-state]").length,
+        webglDisplay: getComputedStyle(root.querySelector("[data-atlas-webgl]")).display,
+        errors: window.__atlasQaErrors,
+      };
+    })()`);
+    check(failureResult.renderer === "svg" && failureResult.paths === 50 && failureResult.webglDisplay === "none", "atlas WebGL failure did not retain a clean SVG fallback");
+    await closeAtlasPage(forcedFailure, { atlasError: /WebGL2 is unavailable/ });
+
+    const mobile = await openAtlasPage(baseUrl, chromePort, "atlas mobile", {
+      metrics: { width: 390, height: 844, deviceScaleFactor: 2, mobile: true },
+    });
+    await scrollToAtlas(mobile.page, mobile.label);
+    await assertAtlasNoOverflow(mobile.page, "atlas mobile after mount");
+    await evaluate(mobile.page, `document.querySelector('input[name="career-year"][value="2022"]').click(); document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
+    await waitForExpression(mobile.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas mobile Oregon case open");
+    await assertAtlasNoOverflow(mobile.page, "atlas mobile with case file");
+    paths.mobileOregon = await capture(mobile.page, "sh-patterson-atlas-mobile-oregon.png");
+    await closeAtlasPage(mobile);
+
+    const print = await openAtlasPage(baseUrl, chromePort, "atlas print");
+    await scrollToAtlas(print.page, print.label);
+    await print.page.send("Emulation.setEmulatedMedia", { media: "print" });
+    const printResult = await evaluate(print.page, `(() => {
+      const root = document.querySelector("[data-career-atlas]");
+      return {
+        interfaceHidden: getComputedStyle(root.querySelector(".atlas-interface")).display === "none",
+        recordDisplays: [...root.querySelectorAll(".atlas-ledger article[data-career-id]")].map((article) => ({
+          display: getComputedStyle(article).display,
+          height: article.getBoundingClientRect().height,
+        })),
+      };
+    })()`);
+    check(printResult.interfaceHidden, "atlas print media did not hide the interactive interface");
+    check(printResult.recordDisplays.length === 6 && printResult.recordDisplays.every(({ display, height }) => display !== "none" && height > 0),
+      `atlas print media did not keep all six ledger records visible: ${JSON.stringify(printResult.recordDisplays)}`);
+    await closeAtlasPage(print);
+
+    return paths;
+  });
+
+  console.log("Atlas smoke passed (Chrome launched with --disable-gpu; no positive hardware WebGL assertion).");
+  console.log(`atlas desktop Overview screenshot: ${screenshots.desktopOverview}`);
+  console.log(`atlas desktop Oregon screenshot: ${screenshots.desktopOregon}`);
+  console.log(`atlas mobile Oregon screenshot: ${screenshots.mobileOregon}`);
+}
+
 async function benchCase(baseUrl, chromePort, label, metrics, options = {}) {
   const page = await newPage(chromePort);
   await page.send("Page.enable");
@@ -402,6 +797,13 @@ async function benchCase(baseUrl, chromePort, label, metrics, options = {}) {
   await page.send("Page.navigate", { url: baseUrl });
   await page.waitFor("Page.loadEventFired");
   await new Promise((resolve) => setTimeout(resolve, 1000));
+  const warmupRaf = (await page.send("Runtime.evaluate", {
+    expression: "window.__qaRaf",
+    returnByValue: true,
+  })).result.value;
+  await page.send("Runtime.evaluate", {
+    expression: "window.__qaRaf = { scheduled: 0, callbacks: 0 }",
+  });
   const start = metricMap((await page.send("Performance.getMetrics")).metrics);
   await new Promise((resolve) => setTimeout(resolve, 5000));
   const end = metricMap((await page.send("Performance.getMetrics")).metrics);
@@ -415,15 +817,17 @@ async function benchCase(baseUrl, chromePort, label, metrics, options = {}) {
 
   const result = {
     label,
+    warmupRaf,
     taskDuration: Number(((end.TaskDuration || 0) - (start.TaskDuration || 0)).toFixed(4)),
     scriptDuration: Number(((end.ScriptDuration || 0) - (start.ScriptDuration || 0)).toFixed(4)),
     raf,
   };
   const budget = options.reducedMotion
-    ? { task: 0.05, script: 0.02, raf: 3 }
+    ? { task: 0.05, script: 0.02, warmupRaf: 3, raf: 3 }
     : options.mobile
-      ? { task: 1.4, script: 0.8, raf: 380 }
-      : { task: 2.0, script: 1.1, raf: 380 };
+      ? { task: 1.4, script: 0.8, warmupRaf: 120, raf: 330 }
+      : { task: 2.0, script: 1.1, warmupRaf: 120, raf: 330 };
+  if (result.warmupRaf.callbacks > budget.warmupRaf) fail(`${label}: warmup RAF callbacks ${result.warmupRaf.callbacks} exceeds ${budget.warmupRaf}`);
   if (result.taskDuration > budget.task) fail(`${label}: task duration ${result.taskDuration}s exceeds ${budget.task}s`);
   if (result.scriptDuration > budget.script) fail(`${label}: script duration ${result.scriptDuration}s exceeds ${budget.script}s`);
   if (result.raf.callbacks > budget.raf) fail(`${label}: RAF callbacks ${result.raf.callbacks} exceeds ${budget.raf}`);
@@ -437,17 +841,19 @@ async function benchCanvas() {
     await benchCase(baseUrl, chromePort, "reduced-motion", { width: 1440, height: 1100, deviceScaleFactor: 1, mobile: false }, { reducedMotion: true }),
   ]);
   for (const result of results) {
-    console.log(`${result.label} bench passed: task=${result.taskDuration}s script=${result.scriptDuration}s raf=${result.raf.callbacks}`);
+    console.log(`${result.label} bench passed: task=${result.taskDuration}s script=${result.scriptDuration}s warmup-raf=${result.warmupRaf.callbacks} steady-raf=${result.raf.callbacks}`);
   }
 }
 
 try {
   if (command === "links") await checkLinks();
   else if (command === "render") await smokeRender();
+  else if (command === "atlas") await smokeAtlas();
   else if (command === "bench") await benchCanvas();
   else if (command === "all") {
     await checkLinks();
     await smokeRender();
+    await smokeAtlas();
     await benchCanvas();
   } else {
     fail(`Unknown command: ${command}`);

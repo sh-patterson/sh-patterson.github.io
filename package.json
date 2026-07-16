@@ -9,8 +9,10 @@
     "build:writing": "node scripts/build-writing.mjs",
     "check:writing": "node scripts/build-writing.mjs --check",
     "check:links": "node scripts/site-qa.mjs links",
+    "test:atlas:unit": "node --test scripts/build-career-atlas.test.mjs atlas/geometry.test.mjs atlas/renderer.test.mjs",
     "smoke:render": "node scripts/site-qa.mjs render",
+    "smoke:atlas": "node scripts/site-qa.mjs atlas",
     "bench:canvas": "node scripts/site-qa.mjs bench",
-    "test": "npm run check:writing && npm run check:links && npm run smoke:render && npm run bench:canvas"
+    "test": "npm run check:atlas && npm run test:atlas:unit && npm run check:writing && npm run check:links && npm run smoke:render && npm run smoke:atlas && npm run bench:canvas"
   }
 }
