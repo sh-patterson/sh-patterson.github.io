@@ -646,10 +646,20 @@ async function smokeAtlas() {
     })()`);
     same(hover, { preview: true, header: "Oregon", pressed: 0, hash: "#career-2022" }, "atlas Oregon hover preview remains unpinned");
     paths.desktopOregonHover = await capture(desktop.page, "sh-patterson-atlas-desktop-oregon-hover.png");
-    await evaluate(desktop.page, `document.querySelector('[data-atlas-svg] path[data-state="OR"]').dispatchEvent(new PointerEvent("pointerout", { bubbles: true })); true`);
-    await waitForExpression(desktop.page, `!document.querySelector("[data-atlas-case]")?.matches(":popover-open") && !document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon hover dismissal");
-    await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
-    await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon case open");
+    const oregonPoint = await evaluate(desktop.page, `(() => {
+      const rect = document.querySelector('[data-atlas-svg] path[data-state="OR"]').getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    })()`);
+    await desktop.page.send("Input.dispatchMouseEvent", { type: "mouseMoved", ...oregonPoint });
+    await desktop.page.send("Input.dispatchMouseEvent", { type: "mousePressed", ...oregonPoint, button: "left", buttons: 1, clickCount: 1 });
+    await desktop.page.send("Input.dispatchMouseEvent", { type: "mouseReleased", ...oregonPoint, button: "left", buttons: 0, clickCount: 1 });
+    await evaluate(desktop.page, `new Promise((resolve) => setTimeout(resolve, 200))`);
+    await waitForExpression(desktop.page, `(() => {
+      const caseFile = document.querySelector("[data-atlas-case]");
+      return (caseFile?.matches(":popover-open") || caseFile?.classList.contains("is-open")) &&
+        !caseFile?.classList.contains("is-preview") &&
+        Boolean(caseFile?.querySelector(".case-receipt"));
+    })()`, "atlas Oregon map click opens full quote");
     const oregon = await evaluate(desktop.page, `(() => {
       const root = document.querySelector("[data-career-atlas]");
       const caseFile = root.querySelector("[data-atlas-case]");
@@ -660,6 +670,7 @@ async function smokeAtlas() {
         role: record?.querySelector(".case-record-title")?.textContent.trim(),
         meta: record?.querySelector(".case-record-meta")?.textContent.trim(),
         roster: record?.querySelector(".case-roster")?.textContent.trim(),
+        quote: record?.querySelector(".case-receipt p")?.textContent.trim(),
         hash: location.hash,
       };
     })()`);
@@ -669,14 +680,27 @@ async function smokeAtlas() {
       role: "Regional Research Director",
       meta: "DCCC · 2022",
       roster: "AZ-01 · AZ-06 · KS-03 · MT-02 · NE-02 · NV-01 · NV-03 · NV-04 · OR-04 · OR-05 · OR-06 · WA-08",
+      quote: "No Democratic president with control of the Senate has ever duplicated the achievement of picking up Senate seats, or even holding steady, in a midterm election. Until now?",
       hash: "#career-2022-or",
-    }, "atlas Oregon compact record");
+    }, "atlas Oregon map click record");
+    await evaluate(desktop.page, `document.querySelector('[data-atlas-svg] path[data-state="OR"]').dispatchEvent(new PointerEvent("pointerover", { bubbles: true })); true`);
+    await evaluate(desktop.page, `new Promise((resolve) => setTimeout(resolve, 100))`);
+    const pinnedMapCase = await evaluate(desktop.page, `(() => {
+      const caseFile = document.querySelector("[data-atlas-case]");
+      return {
+        open: caseFile.matches(":popover-open") || caseFile.classList.contains("is-open"),
+        preview: caseFile.classList.contains("is-preview"),
+        quoteVisible: getComputedStyle(caseFile.querySelector(".case-receipt")).display !== "none",
+        hash: location.hash,
+      };
+    })()`);
+    same(pinnedMapCase, { open: true, preview: false, quoteVisible: true, hash: "#career-2022-or" },
+      "atlas selected map state keeps the full quote pinned");
     await assertAtlasNoOverflow(desktop.page, "atlas desktop with case file");
     paths.desktopOregon = await capture(desktop.page, "sh-patterson-atlas-desktop-oregon.png");
 
-    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
-    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
-    await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas Escape focus restoration");
+    await evaluate(desktop.page, `document.querySelector("[data-atlas-close]").click(); true`);
+    await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas map Close focus restoration");
     await dispatchTab(desktop.page);
     await waitForExpression(desktop.page, `document.activeElement?.dataset.state === "WA"`, "atlas Tab focus advancement");
     await dispatchTab(desktop.page, true);
@@ -690,8 +714,9 @@ async function smokeAtlas() {
     "atlas keyboard focus treatment is not unmistakable: " + JSON.stringify(focusTreatment));
     await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
     await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon reopen");
-    await evaluate(desktop.page, `document.querySelector("[data-atlas-close]").click(); true`);
-    await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas Close focus restoration");
+    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
+    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
+    await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas Escape focus restoration");
 
     await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="AZ"]').click(); true`);
     await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Arizona case open");

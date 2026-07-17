@@ -333,10 +333,10 @@ export const CareerAtlas = Object.freeze({
       return Boolean(previous);
     }
 
-    function selectState(code, invoker = null, { passive = false } = {}) {
+    function selectState(code, invoker = null, { passive = false, toggle = true } = {}) {
       const normalized = String(code || "").toUpperCase();
       if (!activeByYear(currentYear).has(normalized)) return false;
-      if (selectedState === normalized && !passive) {
+      if (selectedState === normalized && !passive && toggle) {
         clearSelection({ restoreFocus: false });
         return true;
       }
@@ -382,6 +382,14 @@ export const CareerAtlas = Object.freeze({
     function previewStateSelection(code) {
       const normalized = String(code || "").toUpperCase();
       if (!activeByYear(currentYear).has(normalized)) return false;
+      if (normalized === selectedState) {
+        previewState = null;
+        caseFile.classList.remove("is-preview");
+        render();
+        renderCase(normalized);
+        showCase();
+        return true;
+      }
       previewState = normalized;
       caseFile.classList.add("is-preview");
       render();
@@ -429,7 +437,7 @@ export const CareerAtlas = Object.freeze({
       const path = event.target.closest("path[data-state]");
       if (!path || !svg.contains(path) || !activeByYear(currentYear).has(path.dataset.state)) return;
       const invoker = stateList.querySelector(`[data-state="${path.dataset.state}"]`);
-      selectState(path.dataset.state, invoker);
+      selectState(path.dataset.state, invoker, { toggle: false });
     }
 
     function onEffectsChange() {
