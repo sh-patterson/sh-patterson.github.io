@@ -369,7 +369,10 @@ async function evaluate(page, expression) {
     returnByValue: true,
     awaitPromise: true,
   });
-  if (response.exceptionDetails) fail(`Browser evaluation failed: ${response.exceptionDetails.text}`);
+  if (response.exceptionDetails) {
+    const detail = response.exceptionDetails.exception?.description || response.exceptionDetails.text;
+    fail(`Browser evaluation failed: ${detail}`);
+  }
   return response.result?.value;
 }
 
@@ -650,21 +653,24 @@ async function smokeAtlas() {
     const oregon = await evaluate(desktop.page, `(() => {
       const root = document.querySelector("[data-career-atlas]");
       const caseFile = root.querySelector("[data-atlas-case]");
+      const record = caseFile.querySelector(".case-record");
       return {
         header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
         recordCount: caseFile.querySelectorAll(".case-record").length,
-        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^Result:\\s*/, "").trim(),
-        receiptLabel: caseFile.querySelector(".receipt-label")?.textContent.trim(),
+        role: record?.querySelector(".case-record-title")?.textContent.trim(),
+        meta: record?.querySelector(".case-record-meta")?.textContent.trim(),
+        roster: record?.querySelector(".case-roster")?.textContent.trim(),
         hash: location.hash,
       };
     })()`);
     same(oregon, {
       header: "Oregon",
       recordCount: 1,
-      evidence: "3 assignments: OR-04, OR-05, OR-06. 2 wins, 1 loss.",
-      receiptLabel: "Cycle context",
+      role: "Regional Research Director",
+      meta: "DCCC · 2022",
+      roster: "AZ-01 · AZ-06 · KS-03 · MT-02 · NE-02 · NV-01 · NV-03 · NV-04 · OR-04 · OR-05 · OR-06 · WA-08",
       hash: "#career-2022-or",
-    }, "atlas Oregon evidence");
+    }, "atlas Oregon compact record");
     await assertAtlasNoOverflow(desktop.page, "atlas desktop with case file");
     paths.desktopOregon = await capture(desktop.page, "sh-patterson-atlas-desktop-oregon.png");
 
@@ -691,18 +697,22 @@ async function smokeAtlas() {
     await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Arizona case open");
     const arizona = await evaluate(desktop.page, `(() => {
       const caseFile = document.querySelector("[data-atlas-case]");
+      const record = caseFile.querySelector(".case-record");
       return {
         recordCount: caseFile.querySelectorAll(".case-record").length,
         header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
-        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^Result:\\s*/, "").trim(),
-        receiptLabel: caseFile.querySelector(".receipt-label")?.textContent.trim(),
+        role: record?.querySelector(".case-record-title")?.textContent.trim(),
+        meta: record?.querySelector(".case-record-meta")?.textContent.trim(),
+        roster: record?.querySelector(".case-roster")?.textContent.trim(),
+        hasRetiredFields: Boolean(record?.querySelector(".case-evidence, .receipt-label")),
         text: caseFile.textContent.replace(/\\s+/g, " ").trim(),
       };
     })()`);
-    check(arizona.recordCount === 1 && arizona.header === "Arizona", "atlas Arizona must contain only its 2022 coverage record");
-    check(arizona.evidence === "Arizona was a coverage assignment only. No electoral result claim is made.", "atlas Arizona must make no result claim");
-    check(arizona.receiptLabel === "Cycle context · cycle context, not a state result", "atlas Arizona must contextualize its cycle receipt");
-    check(!/won|lost|loss|victory/i.test(arizona.evidence), "atlas Arizona evidence contains a result claim");
+    check(arizona.recordCount === 1 && arizona.header === "Arizona", "atlas Arizona must contain its 2022 DCCC record");
+    check(arizona.role === "Regional Research Director" && arizona.meta === "DCCC · 2022", "atlas Arizona compact role metadata is incorrect");
+    check(arizona.roster.includes("AZ-01") && arizona.roster.includes("AZ-06"), "atlas Arizona compact roster is incomplete");
+    check(!arizona.hasRetiredFields, "atlas Arizona still renders retired case-file fields");
+    check(!/lost|loss/i.test(arizona.text), "atlas Arizona contains loss narration");
     await closeAtlasPage(desktop);
 
     const noJs = await openAtlasPage(baseUrl, chromePort, "atlas no-JS", { scriptDisabled: true });
@@ -710,7 +720,7 @@ async function smokeAtlas() {
       const root = document.querySelector("[data-career-atlas]");
       const ledger = root.querySelector(".atlas-ledger");
       const roster = root.querySelector('[data-career-id="2022-dccc-rocky-mountains"] .record-roster')?.textContent
-        .replace(/^Assignments:\\s*/, "").split(",").map((item) => item.trim());
+        .split(" · ").map((item) => item.trim());
       return {
         interfaceHidden: getComputedStyle(root.querySelector(".atlas-interface")).display === "none",
         ledgerOpen: ledger.open,
@@ -724,7 +734,7 @@ async function smokeAtlas() {
       ledgerOpen: true,
       ledgerVisible: true,
       visibleRecords: 6,
-      roster: ["NV-01", "NV-03", "NV-04", "OR-04", "OR-05", "OR-06", "WA-08", "KS-03", "NE-02"],
+      roster: ["AZ-01", "AZ-06", "KS-03", "MT-02", "NE-02", "NV-01", "NV-03", "NV-04", "OR-04", "OR-05", "OR-06", "WA-08"],
     }, "atlas no-JS fallback");
     await closeAtlasPage(noJs, { scriptDisabled: true });
 
@@ -856,7 +866,7 @@ async function smokeAtlas() {
         bodyBackground: getComputedStyle(document.body).backgroundColor,
         heroColor: getComputedStyle(heroHeading).color,
         heroShadow: getComputedStyle(heroHeading).textShadow,
-        recordColor: getComputedStyle(firstRecord.querySelector(".record-summary")).color,
+        recordColor: getComputedStyle(firstRecord.querySelector("blockquote p")).color,
         recordDisplays: [...root.querySelectorAll(".atlas-ledger article[data-career-id]")].map((article) => ({
           display: getComputedStyle(article).display,
           height: article.getBoundingClientRect().height,
@@ -997,6 +1007,13 @@ async function visualAudit() {
 
     await selectVisualYear(desktop.page, "Overview", desktop.label);
     await evaluate(desktop.page, `(() => {
+      const caseFile = document.querySelector("[data-atlas-case]");
+      if (caseFile.matches(":popover-open")) caseFile.hidePopover();
+      caseFile.classList.remove("is-open", "is-preview");
+      caseFile.setAttribute("aria-hidden", "true");
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      document.querySelector(".skip-link").style.display = "none";
+
       const ledger = document.querySelector(".atlas-ledger");
       ledger.open = true;
       ledger.scrollIntoView({ block: "start" });

@@ -1,83 +1,63 @@
 # Shawn Patterson
 
-Campaign research / AI systems
+Campaign leadership / AI systems
 
-I’ve led research programs in competitive races across the country. Now I’m building tools that make the work faster without making it sloppier.
+I started my career helping campaigns win in some of the country’s most competitive states by finding the facts that could change a race and working with talented people to make sure voters heard them.
 
-Public records, transcripts, filings, source checks, and handoff.
+Today, I build AI tools for the people doing that work. Campaign staffers are asked to move faster every year, often while fighting with systems that waste their time and wear them down. I want to give some of that time and energy back, so they can focus on the decisions, relationships, and ideas that actually move a campaign.
+
+I know where the time goes because I have done the work myself. I have built research departments, managed teams through difficult races, and helped campaigns respond when the facts, the timeline, or the entire plan changed overnight. The best work has always come from giving good people useful tools, clear expectations, and room to do what they do best.
 
 GitHub: https://github.com/sh-patterson
 LinkedIn: https://www.linkedin.com/in/shawn-patterson-573b98361/
 
 ## Campaigns, 2018—present
 
-Choose a year or state.
+This map shows the states and districts where I’ve worked. Beneath the data are stories of candidates who were counted out, teams that stayed disciplined, and victories that looked improbable until they happened.
 
 <!-- career-atlas:start -->
-### 2026 — Becerra for Governor / Research Consultant
+### 2026 — Strategic Messaging Consultant · Xavier Becerra for Governor
 
-I served as a research consultant on Xavier Becerra's campaign for governor during a late surge from single-digit polling to first place in California's top-two primary and a spot on the November ballot.
-
-Receipt
-
-"the everyday miracle of living in a state that regularly makes the improbable seem inevitable." — Xavier Becerra via CalMatters
+"…It was a surprising and swift ascent for the mild-mannered career politician who was previously part of a crop of lower-polling Democratic candidates that party chair Rusty Hicks was publicly pressuring to drop out of the race." — CalMatters
 https://calmatters.org/politics/2026/06/california-primary-governor-becerra/
 
-### 2024 — Gallego for Senate / Research Director
-
-I directed the core research operation for a top-tier battleground state. My team managed full-scale contingency planning, conducted legal and property audits, and built a rapid-response department that secured over 20 successful fact-checks against multi-million-dollar attack ads.
-
-Receipt
+### 2024 — Research Director · Ruben Gallego for Senate
 
 "Ruben Gallego outperformed Harris, dominated with Latinos and won Arizona." — NBC News
 https://www.nbcnews.com/politics/2024-elections/arizona-senate-results
 
-### 2023 — Presley for Governor / Research and Policy Director
-
-I ran a dual-desk campaign war room, authoring a comprehensive policy platform while deploying custom AI scrapers to convert 20 years of scanned paper records into digital datasets linking travel logs and state contracts to a public corruption narrative.
-
-Receipt
+### 2023 — Research and Policy Director · Brandon Presley for Governor
 
 "Final election results: 2023 was the closest Mississippi governor's race since 1999." — Mississippi Today
 https://mississippitoday.org/2023/11/22/final-election-results-2023-mississippi-governors-race/
 
-### 2022 — DCCC / Regional Research Director: Rocky Mountains
+### 2022 — Regional Research Director · DCCC
 
-I directed opposition research and rapid response across nine toss-up districts in five core states. The portfolio won seven of nine; the broader region also included Montana and off-year coverage in Arizona.
-
-Assignments: NV-01, NV-03, NV-04, OR-04, OR-05, OR-06, WA-08, KS-03, NE-02
-
-Additional coverage: Arizona off-year coverage (no result claim); Montana regional coverage (no result claim).
-
-Cycle Receipt
+AZ-01 · AZ-06 · KS-03 · MT-02 · NE-02 · NV-01 · NV-03 · NV-04 · OR-04 · OR-05 · OR-06 · WA-08
 
 "No Democratic president with control of the Senate has ever duplicated the achievement of picking up Senate seats, or even holding steady, in a midterm election. Until now?" — The Atlantic
 https://www.theatlantic.com/newsletters/archive/2022/11/democrats-biggest-midterm-shock-polls/672055/
 
-### 2020 — DSCC / Research Associate: Independent Expenditure & Coordinated
+### 2020 — Research Associate · DSCC
 
-I wrote comprehensive opposition research books on major tier-one incumbents, managed multi-state tracking programs, and drafted factual research backups for more than 20 media placements across Georgia, Iowa, Kansas, Michigan, and New Hampshire, with Georgia and Iowa as my largest assignments.
-
-Assignments: GA, IA, KS, MI, NH
-
-Cycle Receipt
+GA · IA · KS · MI · NH
 
 "Democrats won both Georgia Senate seats and with them, the U.S. Senate majority, serving President Donald Trump a stunning defeat in his last days in office." — AP via PBS NewsHour
 https://www.pbs.org/newshour/politics/ossoff-wins-in-georgia-tipping-senate-control-to-democrats
 
-### 2018 — Joe Manchin for Senate / Research Analyst and Tracker
-
-I executed embedded video research and rapid-response operations directly from the trail in a high-exposure defense cycle, authoring the debate briefings, tracking opponent event vulnerabilities, and intercepting hostile media pitches in the heart of Trump country.
-
-Receipt
+### 2018 — Tracker and Research Analyst · Joe Manchin for Senate
 
 "Democratic Sen. Joe Manchin has won re-election in West Virginia in the heart of Trump country, dispatching Republican state Attorney General Patrick Morrisey." — Roll Call
 https://rollcall.com/2018/11/06/west-virginias-joe-manchin-stays-put-in-trump-country/
 <!-- career-atlas:end -->
 
-## What I'm building
+## Tools I’ve built
 
-Tools that make public records easier to search, cite, and use.
+Campaign staffers should not have to choose between moving quickly and getting the details right. I build open-source tools that remove repetitive work while keeping the underlying evidence close at hand.
+
+Most of them began with a problem I had encountered myself: legislation scattered across fifty different systems, campaign-finance records that were difficult to search, political ads that could not be reviewed at scale, or decades of public documents trapped in unusable formats.
+
+I share the tools because good infrastructure should not be reserved for the largest campaign or the best-funded firm. If something I built saves another researcher an afternoon, that is an afternoon they can spend thinking, helping their team, or simply going home at a reasonable hour.
 
 ### legiscan-mcp — Legislative records
 
@@ -113,9 +93,11 @@ https://sh-patterson.github.io/writing/delegate-to-people-first/
 
 Archive: https://sh-patterson.github.io/writing/
 
-## How I work
+## How I approach AI
 
-I start by mapping how a team actually works: what counts as evidence, where time gets lost, and what has to survive review. Then I build against that. I stay through revisions, edge cases, documentation, and handoff until the team can run the system without me.
+AI is useful when it respects the person using it. I do not believe in replacing political judgment with a black box or adding technology because it sounds impressive. I begin with the work as people actually experience it: where they get stuck, what absolutely has to be right, and what they wish they had more time to do. Then I build a reliable system that gives them some of that time back.
+
+Campaign work is full of surprises, and everything takes longer than anyone expects. The technology matters, but clear priorities, honest expectations, and calm collaboration are what keep people moving when the plan changes.
 
 ## Outside work
 

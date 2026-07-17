@@ -48,8 +48,8 @@ export const careerAtlas = {
     {
       "id": "receipt-2026-becerra",
       "kind": "receipt",
-      "quote": "the everyday miracle of living in a state that regularly makes the improbable seem inevitable.",
-      "attribution": "Xavier Becerra via CalMatters",
+      "quote": "…It was a surprising and swift ascent for the mild-mannered career politician who was previously part of a crop of lower-polling Democratic candidates that party chair Rusty Hicks was publicly pressuring to drop out of the race.",
+      "attribution": "CalMatters",
       "url": "https://calmatters.org/politics/2026/06/california-primary-governor-becerra/"
     }
   ],
@@ -60,7 +60,7 @@ export const careerAtlas = {
       "state": "WV",
       "organization": "Joe Manchin for Senate",
       "campaign": "Joe Manchin for Senate",
-      "role": "Research Analyst and Tracker",
+      "role": "Tracker and Research Analyst",
       "summary": "I executed embedded video research and rapid-response operations directly from the trail in a high-exposure defense cycle, authoring the debate briefings, tracking opponent event vulnerabilities, and intercepting hostile media pitches in the heart of Trump country.",
       "scopeType": "campaign",
       "roster": [],
@@ -77,8 +77,8 @@ export const careerAtlas = {
       "year": "2020",
       "state": "GA",
       "organization": "DSCC",
-      "campaign": "Independent Expenditure & Coordinated",
-      "role": "Research Associate: Independent Expenditure & Coordinated",
+      "campaign": "U.S. Senate portfolio",
+      "role": "Research Associate",
       "summary": "I wrote comprehensive opposition research books on major tier-one incumbents, managed multi-state tracking programs, and drafted factual research backups for more than 20 media placements across Georgia, Iowa, Kansas, Michigan, and New Hampshire, with Georgia and Iowa as my largest assignments.",
       "scopeType": "portfolio",
       "roster": [
@@ -110,84 +110,38 @@ export const careerAtlas = {
       "year": "2022",
       "state": "NV",
       "organization": "DCCC",
-      "campaign": "Rocky Mountains region",
-      "role": "Regional Research Director: Rocky Mountains",
-      "summary": "I directed opposition research and rapid response across nine toss-up districts in five core states. The portfolio won seven of nine; the broader region also included Montana and off-year coverage in Arizona.",
+      "campaign": "U.S. House portfolio",
+      "role": "Regional Research Director",
+      "summary": "Regional research leadership across twelve competitive U.S. House districts.",
       "scopeType": "portfolio",
       "roster": [
+        "AZ-01",
+        "AZ-06",
+        "KS-03",
+        "MT-02",
+        "NE-02",
         "NV-01",
         "NV-03",
         "NV-04",
         "OR-04",
         "OR-05",
         "OR-06",
-        "WA-08",
-        "KS-03",
-        "NE-02"
+        "WA-08"
       ],
       "outcome": {
-        "summary": "Seven wins across nine toss-up assignments.",
-        "wins": [
-          "NV-01",
-          "NV-03",
-          "NV-04",
-          "OR-04",
-          "OR-06",
-          "WA-08",
-          "KS-03"
-        ],
-        "losses": [
-          "OR-05",
-          "NE-02"
-        ]
+        "summary": "Regional research portfolio across twelve U.S. House districts."
       },
       "resultType": "portfolio-result",
       "receiptId": "receipt-2022-dccc",
-      "evidenceNote": "Core states were Nevada, Oregon, Washington, Kansas, and Nebraska.",
+      "evidenceNote": "District assignments across Arizona, Kansas, Montana, Nebraska, Nevada, Oregon, and Washington.",
       "activeStates": [
         "NV",
-        "OR",
-        "WA",
-        "KS",
-        "NE",
         "AZ",
-        "MT"
-      ]
-    },
-    {
-      "id": "2022-dccc-arizona-coverage",
-      "year": "2022",
-      "state": "AZ",
-      "organization": "DCCC",
-      "campaign": "Arizona off-year coverage",
-      "role": "Regional Research Director: Rocky Mountains",
-      "summary": "Arizona off-year coverage assignment only; no electoral result claim.",
-      "scopeType": "off-year-coverage",
-      "roster": [],
-      "outcome": null,
-      "resultType": "no-claim",
-      "receiptId": null,
-      "evidenceNote": "Coverage assignment only; no electoral result claim.",
-      "activeStates": [
-        "AZ"
-      ]
-    },
-    {
-      "id": "2022-dccc-montana-coverage",
-      "year": "2022",
-      "state": "MT",
-      "organization": "DCCC",
-      "campaign": "Montana regional coverage",
-      "role": "Regional Research Director: Rocky Mountains",
-      "summary": "Montana regional coverage assignment only; no electoral result claim.",
-      "scopeType": "regional-coverage",
-      "roster": [],
-      "outcome": null,
-      "resultType": "no-claim",
-      "receiptId": null,
-      "evidenceNote": "Coverage assignment only; no electoral result claim.",
-      "activeStates": [
-        "MT"
+        "KS",
+        "MT",
+        "NE",
+        "OR",
+        "WA"
       ]
     },
     {
@@ -201,7 +155,7 @@ export const careerAtlas = {
       "scopeType": "campaign",
       "roster": [],
       "outcome": "The closest Mississippi governor's race since 1999.",
-      "resultType": "loss",
+      "resultType": "context",
       "receiptId": "receipt-2023-presley",
       "evidenceNote": "Research and policy leadership for the statewide campaign.",
       "activeStates": [
@@ -232,8 +186,8 @@ export const careerAtlas = {
       "state": "CA",
       "organization": "Becerra for Governor",
       "campaign": "Xavier Becerra for Governor",
-      "role": "Research Consultant",
-      "summary": "I served as a research consultant on Xavier Becerra's campaign for governor during a late surge from single-digit polling to first place in California's top-two primary and a spot on the November ballot.",
+      "role": "Strategic Messaging Consultant",
+      "summary": "Strategic messaging consulting for Xavier Becerra’s 2026 campaign for governor.",
       "scopeType": "campaign",
       "roster": [],
       "outcome": "Advanced after finishing first in California's top-two primary.",

@@ -11,7 +11,7 @@ const runtimePath = path.join(root, "atlas", "career-data.generated.js");
 
 export const CANONICAL_YEARS = Object.freeze(["Overview", "2018", "2020", "2022", "2023", "2024", "2026"]);
 export const SCOPE_TYPES = Object.freeze(["campaign", "portfolio", "regional-coverage", "off-year-coverage"]);
-export const RESULT_TYPES = Object.freeze(["win", "loss", "advanced", "portfolio-result", "no-claim"]);
+export const RESULT_TYPES = Object.freeze(["win", "advanced", "portfolio-result", "context", "no-claim"]);
 export const RECEIPT_KINDS = Object.freeze(["receipt", "cycle-receipt"]);
 export const HTML_MARKERS = Object.freeze(["<!-- career-atlas:start -->", "<!-- career-atlas:end -->"]);
 export const MARKDOWN_MARKERS = Object.freeze(["<!-- career-atlas:start -->", "<!-- career-atlas:end -->"]);
@@ -27,14 +27,12 @@ const REQUIRED_RECORD_FIELDS = [
   "resultType", "receiptId", "evidenceNote", "summary"
 ];
 const EXPECTED_ROLES = new Map([
-  ["2018-wv-manchin", "Research Analyst and Tracker"],
-  ["2020-dscc-senate-portfolio", "Research Associate: Independent Expenditure & Coordinated"],
-  ["2022-dccc-rocky-mountains", "Regional Research Director: Rocky Mountains"],
-  ["2022-dccc-arizona-coverage", "Regional Research Director: Rocky Mountains"],
-  ["2022-dccc-montana-coverage", "Regional Research Director: Rocky Mountains"],
+  ["2018-wv-manchin", "Tracker and Research Analyst"],
+  ["2020-dscc-senate-portfolio", "Research Associate"],
+  ["2022-dccc-rocky-mountains", "Regional Research Director"],
   ["2023-ms-presley", "Research and Policy Director"],
   ["2024-az-gallego", "Research Director"],
-  ["2026-ca-becerra", "Research Consultant"]
+  ["2026-ca-becerra", "Strategic Messaging Consultant"]
 ]);
 const EXPECTED_RECEIPT_KINDS = new Map([
   ["receipt-2018-manchin", "receipt"],
@@ -56,7 +54,8 @@ function escapeHtml(value = "") {
 }
 
 function recordTitle(record) {
-  return `${record.organization} / ${record.role}`;
+  const campaign = ["DCCC", "DSCC"].includes(record.organization) ? record.organization : record.campaign;
+  return `${record.role} · ${campaign}`;
 }
 
 function assertion(condition, message, errors) {
@@ -137,13 +136,8 @@ export function validateCareerAtlas(data) {
 
   const dccc = data.records.find((record) => record.id === "2022-dccc-rocky-mountains");
   if (dccc) {
-    const expectedRoster = ["NV-01", "NV-03", "NV-04", "OR-04", "OR-05", "OR-06", "WA-08", "KS-03", "NE-02"];
-    const expectedWins = ["NV-01", "NV-03", "NV-04", "OR-04", "OR-06", "WA-08", "KS-03"];
-    const expectedLosses = ["OR-05", "NE-02"];
-    assertion(JSON.stringify(dccc.roster) === JSON.stringify(expectedRoster), "DCCC roster must contain the canonical nine districts in order", errors);
-    assertion(JSON.stringify(dccc.outcome?.wins) === JSON.stringify(expectedWins), "DCCC wins must contain the canonical seven assignments", errors);
-    assertion(JSON.stringify(dccc.outcome?.losses) === JSON.stringify(expectedLosses), "DCCC losses must be OR-05 and NE-02", errors);
-    assertion(new Set([...(dccc.outcome?.wins || []), ...(dccc.outcome?.losses || [])]).size === 9, "DCCC outcomes must account for all nine districts", errors);
+    const expectedRoster = ["AZ-01", "AZ-06", "KS-03", "MT-02", "NE-02", "NV-01", "NV-03", "NV-04", "OR-04", "OR-05", "OR-06", "WA-08"];
+    assertion(JSON.stringify(dccc.roster) === JSON.stringify(expectedRoster), "DCCC roster must contain the canonical twelve districts in order", errors);
   }
 
   return errors;
@@ -159,22 +153,6 @@ function groupedRenderableRecords(data) {
   return data.records
     .filter((record) => record.resultType !== "no-claim")
     .toSorted((a, b) => order.get(b.year) - order.get(a.year) || a.id.localeCompare(b.id));
-}
-
-function relatedCoverage(data, record) {
-  return data.records.filter((candidate) =>
-    candidate.year === record.year
-    && candidate.organization === record.organization
-    && candidate.resultType === "no-claim"
-  );
-}
-
-function coverageLabel(record) {
-  return `${record.campaign} (no result claim)`;
-}
-
-function receiptLabel(receipt) {
-  return receipt.kind === "cycle-receipt" ? "Cycle Receipt" : "Receipt";
 }
 
 function rosterState(assignment) {
@@ -198,20 +176,14 @@ export function renderCareerHtml(data) {
   return groupedRenderableRecords(data).map((record) => {
     const receipt = receipts.get(record.receiptId);
     const roster = record.roster.length
-      ? `\n                        <p class="record-roster"><strong>Assignments:</strong> ${record.roster.map(escapeHtml).join(", ")}</p>`
-      : "";
-    const coverage = relatedCoverage(data, record);
-    const coverageNote = coverage.length
-      ? `\n                        <p class="record-coverage"><strong>Additional coverage:</strong> ${coverage.map((item) => escapeHtml(coverageLabel(item))).join("; ")}.</p>`
+      ? `\n                        <p class="record-roster">${record.roster.map(escapeHtml).join(" · ")}</p>`
       : "";
     const states = deriveRecordStates(record, data.records);
     return `                <article id="career-${escapeHtml(record.year)}-${escapeHtml(record.state.toLowerCase())}" data-career-id="${escapeHtml(record.id)}" data-career-year="${escapeHtml(record.year)}" data-career-state="${escapeHtml(record.state)}" data-career-states="${escapeHtml(states.join(" "))}">
                     <div class="record-date">${escapeHtml(record.year)}</div>
                     <div>
-                        <h3>${escapeHtml(recordTitle(record))}</h3>
-                        <p class="record-summary">${escapeHtml(record.summary)}</p>${roster}${coverageNote}
+                        <h3>${escapeHtml(recordTitle(record))}</h3>${roster}
                         <blockquote>
-                            <span class="receipt-label">${receiptLabel(receipt)}</span>
                             <p>${escapeHtml(receipt.quote)}</p>
                             <cite><a href="${escapeHtml(receipt.url)}">${escapeHtml(receipt.attribution)}</a></cite>
                         </blockquote>
@@ -225,10 +197,8 @@ export function renderCareerMarkdown(data) {
   const receipts = new Map(data.receipts.map((receipt) => [receipt.id, receipt]));
   return groupedRenderableRecords(data).map((record) => {
     const receipt = receipts.get(record.receiptId);
-    const roster = record.roster.length ? `\n\nAssignments: ${record.roster.join(", ")}` : "";
-    const coverage = relatedCoverage(data, record);
-    const coverageNote = coverage.length ? `\n\nAdditional coverage: ${coverage.map(coverageLabel).join("; ")}.` : "";
-    return `### ${record.year} — ${recordTitle(record)}\n\n${record.summary}${roster}${coverageNote}\n\n${receiptLabel(receipt)}\n\n"${receipt.quote}" — ${receipt.attribution}\n${receipt.url}`;
+    const roster = record.roster.length ? `\n\n${record.roster.join(" · ")}` : "";
+    return `### ${record.year} — ${recordTitle(record)}${roster}\n\n"${receipt.quote}" — ${receipt.attribution}\n${receipt.url}`;
   }).join("\n\n");
 }
 

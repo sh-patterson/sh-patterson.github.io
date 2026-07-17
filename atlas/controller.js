@@ -20,12 +20,6 @@ function node(document, tag, className, text) {
   return element;
 }
 
-function appendLabeledText(document, parent, label, text, className = "case-line") {
-  const line = node(document, "p", className);
-  line.append(node(document, "strong", "", label), document.createTextNode(text));
-  parent.append(line);
-}
-
 function normalizeData(input) {
   if (Array.isArray(input)) return { records: input, receipts: [], years: ["Overview", ...new Set(input.map(({ year }) => year))] };
   if (input && Array.isArray(input.records)) return input;
@@ -215,59 +209,28 @@ export const CareerAtlas = Object.freeze({
       positionAnchor();
     }
 
-    function stateEvidence(record, code) {
-      if (COVERAGE_TYPES.has(record.scopeType)) {
-        return `${stateNames.get(code)} was a coverage assignment only. No electoral result claim is made.`;
-      }
-      if (record.id === "2020-dscc-senate-portfolio") {
-        return record.outcome?.stateClaims?.[code]
-          ?? `${stateNames.get(code)} was within the five-state assignment scope. No state result claim is made.`;
-      }
-      if (record.id === "2022-dccc-rocky-mountains") {
-        const assignments = record.roster.filter((assignment) => stateCode(assignment) === code);
-        const wins = record.outcome.wins.filter((assignment) => stateCode(assignment) === code);
-        const losses = record.outcome.losses.filter((assignment) => stateCode(assignment) === code);
-        return `${assignments.length} ${assignments.length === 1 ? "assignment" : "assignments"}: ${assignments.join(", ")}. ${wins.length} ${wins.length === 1 ? "win" : "wins"}, ${losses.length} ${losses.length === 1 ? "loss" : "losses"}.`;
-      }
-      return typeof record.outcome === "string" ? record.outcome : record.evidenceNote;
-    }
-
-    function receiptFor(record) {
-      const direct = receipts.get(record.receiptId);
-      if (direct) return { receipt: direct, contextual: false };
-      if (record.year === "2022" && COVERAGE_TYPES.has(record.scopeType)) {
-        const cycle = data.records.find((candidate) => candidate.id === "2022-dccc-rocky-mountains");
-        return { receipt: receipts.get(cycle?.receiptId), contextual: true };
-      }
-      return { receipt: null, contextual: false };
-    }
-
-    function caseRecord(record, code) {
+    function caseRecord(record) {
       const article = node(document, "article", "case-record");
-      const heading = node(document, "h4", "case-record-title", `${record.organization} / ${record.role}`);
-      const meta = node(document, "p", "case-record-meta", `${record.year} · ${record.campaign}`);
+      const heading = node(document, "h4", "case-record-title", record.role);
+      const campaign = ["DCCC", "DSCC"].includes(record.organization)
+        ? record.organization
+        : record.campaign;
+      const meta = node(document, "p", "case-record-meta", `${campaign} · ${record.year}`);
       article.append(heading, meta);
-      article.append(node(document, "p", "case-line case-summary", record.summary));
-      appendLabeledText(document, article, "Result: ", stateEvidence(record, code), "case-line case-evidence");
-      if (record.roster?.length && record.id !== "2022-dccc-rocky-mountains") {
-        const stateRoster = record.roster.filter((assignment) => stateCode(assignment) === code);
-        if (stateRoster.length) appendLabeledText(document, article, "Assignments: ", stateRoster.join(", "));
+
+      if (record.roster?.length) {
+        article.append(node(document, "p", "case-roster", record.roster.join(" · ")));
       }
-      const { receipt, contextual } = receiptFor(record);
-      const dsccContext = record.id === "2020-dscc-senate-portfolio" && code !== "GA";
+
+      const receipt = receipts.get(record.receiptId);
       if (receipt) {
         const proof = node(document, "blockquote", "case-receipt");
-        const label = receipt.kind === "cycle-receipt" ? "Cycle context" : "Result";
-        const contextLabel = dsccContext
-          ? `${label} · Georgia context, not a result in ${stateNames.get(code)}`
-          : contextual ? `${label} · cycle context, not a state result` : label;
-        proof.append(node(document, "span", "receipt-label", contextLabel));
-        proof.append(node(document, "p", "", receipt.quote));
+        const quote = node(document, "p", "", receipt.quote);
         const cite = node(document, "cite");
         const link = node(document, "a", "", receipt.attribution);
         link.href = receipt.url;
         cite.append(link);
-        proof.append(cite);
+        proof.append(quote, cite);
         article.append(proof);
       }
       return article;
@@ -281,7 +244,7 @@ export const CareerAtlas = Object.freeze({
       const header = node(document, "header", "case-header");
       header.append(node(document, "h3", "", name), node(document, "p", "case-kicker", recordYears));
       caseContent.append(header);
-      for (const record of records) caseContent.append(caseRecord(record, code));
+      for (const record of records) caseContent.append(caseRecord(record));
     }
 
     function restoreInvoker() {
