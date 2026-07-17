@@ -1,11 +1,11 @@
 export const ATLAS_VIEW_BOX = Object.freeze([0, 0, 1000, 620]);
 
 export const ATLAS_PALETTE = Object.freeze({
-  background: "#0b0c0e",
-  ink: "#f3eadb",
-  muted: "#8f8678",
-  gold: "#c9a45d",
-  cyan: "#5ff7e0",
+  background: "#f3eddf",
+  ink: "#211f1b",
+  muted: "#6c645b",
+  gold: "#d9d2c5",
+  cyan: "#245269",
 });
 
 export const ATLAS_RENDERERS = Object.freeze({

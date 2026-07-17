@@ -1,21 +1,17 @@
 # Shawn Patterson
 
-I run research and AI systems for Democratic campaigns.
+Campaign research / AI systems
 
-Most of the AI work I do starts from the same problem: a team is drowning in source material and raw data, the deadlines are not moving, and the existing tools were not built for the speed or the volume.
+I’ve led research programs in competitive races across the country. Now I’m building tools that make the work faster without making it sloppier.
 
-On campaigns, I pioneered a video research methodology that brought automated transcription and mass scraping into daily research practice. In Mississippi and Arizona, I ran the first AI-first research department.
-
-Off campaigns, I travel for paintings. Most recent: Museum of Fine Arts, Budapest; Kunsthistorisches Museum, Vienna. Next: Museo del Prado, Madrid.
+Public records, transcripts, filings, source checks, and handoff.
 
 GitHub: https://github.com/sh-patterson
 LinkedIn: https://www.linkedin.com/in/shawn-patterson-573b98361/
 
-## Selected work
+## Campaigns, 2018—present
 
-FIELD ATLAS / 2017—PRESENT
-
-Proof has a geography.
+Choose a year or state.
 
 <!-- career-atlas:start -->
 ### 2026 — Becerra for Governor / Research Consultant
@@ -81,30 +77,55 @@ https://rollcall.com/2018/11/06/west-virginias-joe-manchin-stays-put-in-trump-co
 
 ## What I'm building
 
-I design open-source tools and production systems for research teams that require absolute speed without losing their chain of proof.
+Tools that make public records easier to search, cite, and use.
 
-### legiscan-mcp — Open source / MCP
+### legiscan-mcp — Legislative records
 
-Legislative data from all 50 states and Congress. Search bills, parse full text, track votes, and monitor structural changes natively inside LLM workflows.
+Search bills, full text, votes, and legislative history across all 50 states and Congress.
 https://github.com/sh-patterson/legiscan-mcp
 
-### fec-mcp-server — Open source / MCP
+### fec-mcp-server — Campaign finance
 
-Live campaign finance data made queryable. Instantly surface candidates, donations, spending velocity, and Super PAC activity.
+Query FEC data on candidates, contributions, spending, and independent expenditures.
 https://github.com/sh-patterson/fec-mcp-server
 
-### fcc-opif-extractor — Open source / Filings
+### fcc-opif-extractor — Public-file records
 
-Automated pipelines pulling political ad buys directly out of the FCC public inspection files to track opponent airwar metrics in real time.
+Pull political-ad buys from FCC public inspection files and turn them into structured data.
 https://github.com/sh-patterson/fcc-opif-extractor
+
+## Writing
+
+### Moonshot Compost — March 24, 2026
+
+Astro Teller says "most of why we waste time at work is fear."
+https://sh-patterson.github.io/writing/astro-teller-three-things/
+
+### Staring at Saint Jerome: Two paintings about obsession — February 25, 2026
+
+Two paintings about obsession, and the labor inside them.
+https://sh-patterson.github.io/writing/staring-at-saint-jerome/
+
+### If you can't delegate to people, you can't delegate to AI either — February 17, 2026
+
+Most people using AI at work are delegating projects they couldn't delegate to a person, then getting frustrated when the computer can't read their mind.
+https://sh-patterson.github.io/writing/delegate-to-people-first/
+
+Archive: https://sh-patterson.github.io/writing/
 
 ## How I work
 
-I help teams map their workflows and assess where the real bottlenecks live. Then I build a prototype that fits their data and follows their analytical methodology: what they treat as important, and how they find it. I stay on through revisions, edge cases, and handoff until the system is sturdy enough for the team to own and maintain.
+I start by mapping how a team actually works: what counts as evidence, where time gets lost, and what has to survive review. Then I build against that. I stay through revisions, edge cases, documentation, and handoff until the team can run the system without me.
+
+## Outside work
+
+I also write about paintings. Usually about obsession, labor, and what happens when you look at something for a long time.
 
 ## Contact
+
+If you want to talk about a campaign, a research problem, or a useful tool, get in touch.
 
 GitHub: https://github.com/sh-patterson
 LinkedIn: https://www.linkedin.com/in/shawn-patterson-573b98361/
 
-Revised 2026-07-16.
+Revised 2026-07-17.

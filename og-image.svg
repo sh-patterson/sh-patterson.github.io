@@ -1,20 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#0b0c0e"/>
-  <g opacity="0.14" stroke="#f3eadb" stroke-width="1">
-    <path d="M720 160 L820 210 L790 330 L900 390 L1010 280"/>
-    <path d="M820 210 L930 170 L1010 280 L1080 430"/>
-    <circle cx="720" cy="160" r="6"/>
-    <circle cx="820" cy="210" r="6"/>
-    <circle cx="790" cy="330" r="6"/>
-    <circle cx="900" cy="390" r="6"/>
-    <circle cx="1010" cy="280" r="6"/>
-    <circle cx="930" cy="170" r="6"/>
-    <circle cx="1080" cy="430" r="6"/>
+  <rect width="1200" height="630" fill="#f3eddf"/>
+  <line x1="72" y1="70" x2="1128" y2="70" stroke="#bdb3a3" stroke-width="2"/>
+  <text x="72" y="122" fill="#245269" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="22" letter-spacing="3">CAMPAIGN RESEARCH / AI SYSTEMS</text>
+  <text x="68" y="294" fill="#211f1b" font-family="Georgia, 'Times New Roman', serif" font-size="110">Shawn Patterson</text>
+  <text x="72" y="380" fill="#211f1b" font-family="Georgia, 'Times New Roman', serif" font-size="36">Campaign leadership. Public records. Useful tools.</text>
+  <line x1="72" y1="448" x2="1128" y2="448" stroke="#bdb3a3" stroke-width="2"/>
+  <text x="72" y="503" fill="#6c645b" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="23" letter-spacing="2">CAMPAIGNS, 2018—PRESENT</text>
+  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="20" fill="#6c645b">
+    <rect x="72" y="543" width="18" height="18" fill="#8b4f3f"/>
+    <text x="102" y="559">2018</text>
+    <rect x="198" y="543" width="18" height="18" fill="#b9852f"/>
+    <text x="228" y="559">2020</text>
+    <rect x="324" y="543" width="18" height="18" fill="#82906d"/>
+    <text x="354" y="559">2022</text>
+    <rect x="450" y="543" width="18" height="18" fill="#4f7c78"/>
+    <text x="480" y="559">2023</text>
+    <rect x="576" y="543" width="18" height="18" fill="#6d667f"/>
+    <text x="606" y="559">2024</text>
+    <rect x="702" y="543" width="18" height="18" fill="#84576f"/>
+    <text x="732" y="559">2026</text>
   </g>
-  <text x="92" y="110" fill="#c9a45d" font-family="monospace" font-size="24">PATTERSON RESEARCH / AI-FIRST CAMPAIGN TOOLS</text>
-  <text x="88" y="286" fill="#f3eadb" font-family="Georgia, serif" font-size="108">Shawn</text>
-  <text x="88" y="402" fill="#f3eadb" font-family="Georgia, serif" font-size="108">Patterson</text>
-  <rect x="92" y="438" width="74" height="4" fill="#c9a45d"/>
-  <text x="92" y="505" fill="#c8bdab" font-family="Arial, sans-serif" font-size="34">Political technologist for Democratic campaigns.</text>
-  <rect x="92" y="554" width="420" height="1" fill="#c9a45d" opacity="0.55"/>
+  <text x="1128" y="559" text-anchor="end" fill="#245269" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="20">sh-patterson.github.io</text>
 </svg>

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shawn Patterson — research and AI for Democratic campaigns</title>
-    <meta name="description" content="I run research and AI systems for Democratic campaigns.">
+    <title>Shawn Patterson — campaign research and AI systems</title>
+    <meta name="description" content="I’ve led campaign research programs across the country. Now I build tools for public records, source checks, and handoff.">
     <link rel="canonical" href="https://sh-patterson.github.io/">
-    <meta name="theme-color" content="#0b0c0e">
+    <meta name="theme-color" content="#f3eddf">
 
-    <meta property="og:title" content="Shawn Patterson — research and AI for Democratic campaigns">
-    <meta property="og:description" content="I run research and AI systems for Democratic campaigns.">
+    <meta property="og:title" content="Shawn Patterson — campaign research and AI systems">
+    <meta property="og:description" content="I’ve led campaign research programs across the country. Now I build tools for public records, source checks, and handoff.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://sh-patterson.github.io/">
     <meta property="og:image" content="https://sh-patterson.github.io/og-image.png">
@@ -17,8 +17,8 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Shawn Patterson — research and AI for Democratic campaigns">
-    <meta name="twitter:description" content="I run research and AI systems for Democratic campaigns.">
+    <meta name="twitter:title" content="Shawn Patterson — campaign research and AI systems">
+    <meta name="twitter:description" content="I’ve led campaign research programs across the country. Now I build tools for public records, source checks, and handoff.">
     <meta name="twitter:image" content="https://sh-patterson.github.io/og-image.png">
 
     <script type="application/ld+json">
@@ -27,7 +27,7 @@
         "@type": "Person",
         "name": "Shawn Patterson",
         "url": "https://sh-patterson.github.io/",
-        "jobTitle": "research and AI systems for Democratic campaigns",
+        "jobTitle": "Campaign research leader and AI systems builder",
         "sameAs": [
             "https://github.com/sh-patterson",
             "https://www.linkedin.com/in/shawn-patterson-573b98361/"
@@ -36,55 +36,39 @@
     </script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="editorial.css">
 </head>
 <body>
     <a class="skip-link" href="#main">Skip to main content</a>
 
-    <div class="atmosphere" aria-hidden="true">
-        <canvas id="atlas-canvas"></canvas>
-        <div class="grain"></div>
-    </div>
-
     <main id="main" class="site-shell">
         <header id="hero" class="hero" aria-labelledby="site-title">
-            <h1 id="site-title">Shawn Patterson</h1>
-            <p class="lede">I run research and AI systems for Democratic campaigns.</p>
-
-            <p class="hero-copy">
-                Most of the AI work I do starts from the same problem: a team is
-                drowning in source material and raw data, the deadlines are not
-                moving, and the existing tools were not built for the speed or
-                the volume.
-            </p>
-            <p class="hero-copy">
-                On campaigns, I pioneered a video research methodology that brought
-                automated transcription and mass scraping into daily research practice.
-                In Mississippi and Arizona, I ran the first AI-first research department.
-            </p>
-
-            <p class="hero-coda">
-                Off campaigns, I travel for paintings. Most recent: Museum of Fine Arts,
-                Budapest; Kunsthistorisches Museum, Vienna. Next: Museo del Prado, Madrid.
-            </p>
-
-            <nav class="contact-inline" aria-label="Primary contact links">
-                <a href="https://github.com/sh-patterson">GitHub</a>
-                <a href="https://www.linkedin.com/in/shawn-patterson-573b98361/">LinkedIn</a>
-                <a href="/writing/">Writing</a>
+            <nav class="site-nav" aria-label="Primary navigation">
+                <a class="site-mark" href="#hero">Shawn Patterson</a>
+                <div>
+                    <a href="#hero">About</a>
+                    <a href="#career-atlas">Work</a>
+                    <a href="#building">Tools</a>
+                    <a href="/writing/">Notes</a>
+                    <a href="#contact">Contact</a>
+                </div>
             </nav>
+
+            <div class="hero-inner">
+            <p class="hero-kicker">Campaign research / AI systems</p>
+            <h1 id="site-title">Shawn Patterson</h1>
+            <p class="lede">I’ve led research programs in competitive races across the country. Now I’m building tools that make the work faster without making it sloppier.</p>
+            <p class="hero-detail">Public records, transcripts, filings, source checks, and handoff.</p>
+            </div>
         </header>
 
         <section id="career-atlas" class="folio-section career-atlas" aria-labelledby="work-title" data-career-atlas>
             <div class="atlas-shell">
                 <header class="atlas-header">
                     <div>
-                        <p class="atlas-kicker">Field Atlas / 2017&mdash;Present</p>
-                        <h2 id="work-title">Selected work</h2>
+                        <h2 id="work-title">Campaigns, 2018&mdash;present</h2>
+                        <p class="atlas-thesis">Choose a year or state.</p>
                     </div>
-                    <p class="atlas-thesis">Proof has a geography.</p>
-                </header>
-
-                <div class="atlas-interface" aria-label="Career field atlas">
                     <fieldset class="atlas-year-rail">
                         <legend>Cycle</legend>
                         <div class="atlas-year-options">
@@ -97,7 +81,9 @@
                             <label><input type="radio" name="career-year" value="2026"> <span>2026</span></label>
                         </div>
                     </fieldset>
+                </header>
 
+                <div class="atlas-interface" aria-label="Career field atlas">
                     <div class="atlas-workbench">
                         <div class="atlas-map-column">
                             <div class="atlas-map-stage" data-atlas-map-stage>
@@ -106,10 +92,13 @@
                                 <span class="atlas-selection-anchor" data-atlas-anchor aria-hidden="true"></span>
                             </div>
                             <div class="atlas-map-meta">
-                                <div class="atlas-legend" aria-label="Map legend">
-                                    <span><i class="legend-swatch legend-active"></i>Assignment</span>
-                                    <span><i class="legend-swatch legend-multi"></i>Multiple cycles</span>
-                                    <span><i class="legend-swatch legend-coverage"></i>Coverage only</span>
+                                <div class="atlas-legend" aria-label="Campaign year colors">
+                                    <span><i class="legend-swatch year-2018"></i>2018</span>
+                                    <span><i class="legend-swatch year-2020"></i>2020</span>
+                                    <span><i class="legend-swatch year-2022"></i>2022</span>
+                                    <span><i class="legend-swatch year-2023"></i>2023</span>
+                                    <span><i class="legend-swatch year-2024"></i>2024</span>
+                                    <span><i class="legend-swatch year-2026"></i>2026</span>
                                 </div>
                                 <p class="atlas-renderer-status" aria-live="polite">Renderer: awaiting activation</p>
                             </div>
@@ -117,25 +106,25 @@
 
                         <aside class="atlas-index" aria-labelledby="atlas-states-title">
                             <div class="atlas-index-heading">
-                                <h3 id="atlas-states-title">Active states</h3>
+                                <h3 id="atlas-states-title">States in view</h3>
                                 <span data-atlas-count></span>
                             </div>
                             <div class="atlas-state-list" data-atlas-state-list></div>
                             <label class="atlas-effects">
                                 <input type="checkbox" data-atlas-effects>
-                                <span>Reduce effects</span>
+                                <span>Less motion</span>
                             </label>
                         </aside>
                     </div>
 
-                    <div class="atlas-case-file" data-atlas-case popover="auto" aria-live="polite">
-                        <button class="atlas-case-close" type="button" data-atlas-close aria-label="Close case file">Close</button>
+                    <div class="atlas-tooltip" data-atlas-case popover="auto" aria-live="polite">
+                        <button class="atlas-tooltip-close" type="button" data-atlas-close aria-label="Close state details">Close</button>
                         <div data-atlas-case-content></div>
                     </div>
                 </div>
 
                 <details class="atlas-ledger" open>
-                    <summary>Full career ledger</summary>
+                    <summary>Campaign record and sources</summary>
                     <div class="ledger">
 <!-- career-atlas:start -->
                 <article id="career-2026-ca" data-career-id="2026-ca-becerra" data-career-year="2026" data-career-state="CA" data-career-states="CA">
@@ -219,34 +208,33 @@
             </div>
         </section>
 
-        <section class="folio-section" aria-labelledby="building-title">
+        <section id="building" class="folio-section" aria-labelledby="building-title">
             <div class="folio-inner">
             <h2 id="building-title">What I'm building</h2>
             <p class="section-copy">
-                I design open-source tools and production systems for research
-                teams that require absolute speed without losing their chain of proof.
+                Tools that make public records easier to search, cite, and use.
             </p>
             <div class="project-list">
                 <article>
                     <div class="project-title">
                         <h3><a href="https://github.com/sh-patterson/legiscan-mcp">legiscan-mcp</a></h3>
-                        <span class="proof-object">Open source / MCP</span>
+                        <span class="proof-object">Legislative records</span>
                     </div>
-                    <p>Legislative data from all 50 states and Congress. Search bills, parse full text, track votes, and monitor structural changes natively inside LLM workflows.</p>
+                    <p>Search bills, full text, votes, and legislative history across all 50 states and Congress.</p>
                 </article>
                 <article>
                     <div class="project-title">
                         <h3><a href="https://github.com/sh-patterson/fec-mcp-server">fec-mcp-server</a></h3>
-                        <span class="proof-object">Open source / MCP</span>
+                        <span class="proof-object">Campaign finance</span>
                     </div>
-                    <p>Live campaign finance data made queryable. Instantly surface candidates, donations, spending velocity, and Super PAC activity.</p>
+                    <p>Query FEC data on candidates, contributions, spending, and independent expenditures.</p>
                 </article>
                 <article>
                     <div class="project-title">
                         <h3><a href="https://github.com/sh-patterson/fcc-opif-extractor">fcc-opif-extractor</a></h3>
-                        <span class="proof-object">Open source / Filings</span>
+                        <span class="proof-object">Public-file records</span>
                     </div>
-                    <p>Automated pipelines pulling political ad buys directly out of the FCC public inspection files to track opponent airwar metrics in real time.</p>
+                    <p>Pull political-ad buys from FCC public inspection files and turn them into structured data.</p>
                 </article>
             </div>
             </div>
@@ -289,19 +277,30 @@
             <h2 id="how-title">How I work</h2>
             <div class="prose-block">
                 <p>
-                    I help teams map their workflows and assess where the real bottlenecks
-                    live. Then I build a prototype that fits their data and follows their
-                    analytical methodology: what they treat as important, and how they find
-                    it. I stay on through revisions, edge cases, and handoff until the
-                    system is sturdy enough for the team to own and maintain.
+                    I start by mapping how a team actually works: what counts as evidence,
+                    where time gets lost, and what has to survive review. Then I build against
+                    that. I stay through revisions, edge cases, documentation, and handoff
+                    until the team can run the system without me.
                 </p>
             </div>
             </div>
         </section>
 
-        <section class="folio-section contact-section" aria-labelledby="contact-title">
+        <section class="folio-section attention-section" aria-labelledby="attention-title">
+            <div class="folio-inner attention-grid">
+                <p class="section-label">Outside work</p>
+                <div>
+                    <h2 id="attention-title">I also write about paintings.</h2>
+                    <p class="section-copy">Usually about obsession, labor, and what happens when you look at something for a long time.</p>
+                    <a class="text-link" href="/writing/staring-at-saint-jerome/">Read “Staring at Saint Jerome”</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="folio-section contact-section" aria-labelledby="contact-title">
             <div class="folio-inner">
             <h2 id="contact-title">Contact</h2>
+            <p class="section-copy">If you want to talk about a campaign, a research problem, or a useful tool, get in touch.</p>
             <address class="contact-block">
                 <a href="https://github.com/sh-patterson">github.com/sh-patterson</a>
                 <a href="https://www.linkedin.com/in/shawn-patterson-573b98361/">linkedin.com/in/shawn-patterson</a>
@@ -311,7 +310,7 @@
 
         <footer class="site-footer">
             <div class="folio-inner">
-                <span>Revised 2026-07-16.</span>
+                <span>Revised 2026-07-17.</span>
             </div>
         </footer>
     </main>

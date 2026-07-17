@@ -533,11 +533,8 @@ async function renderCase(baseUrl, chromePort, label, metrics) {
       scrollWidth: document.documentElement.scrollWidth,
       innerWidth: window.innerWidth,
       overflowing,
-      canvas: (() => {
-        const canvas = document.querySelector("#atlas-canvas");
-        const rect = canvas.getBoundingClientRect();
-        return { width: Math.round(rect.width), height: Math.round(rect.height), attrWidth: canvas.width, attrHeight: canvas.height };
-      })()
+      editorialSurface: getComputedStyle(document.body).backgroundColor,
+      hasAtmosphere: Boolean(document.querySelector(".atmosphere, #atlas-canvas"))
     };
   })()`;
   const result = (await page.send("Runtime.evaluate", { expression, returnByValue: true })).result.value;
@@ -569,7 +566,8 @@ async function renderCase(baseUrl, chromePort, label, metrics) {
   if (!result.skipFocused) fail(`${label}: skip link did not receive focus`);
   if (result.scrollWidth > result.innerWidth + 1) fail(`${label}: document has horizontal overflow`);
   if (result.overflowing.length) fail(`${label}: elements overflow viewport: ${JSON.stringify(result.overflowing)}`);
-  if (!result.canvas.width || !result.canvas.height) fail(`${label}: canvas did not size correctly`);
+  if (result.editorialSurface !== "rgb(243, 237, 223)") fail(`${label}: editorial paper surface is missing: ${result.editorialSurface}`);
+  if (result.hasAtmosphere) fail(`${label}: deprecated atmospheric canvas is still present`);
   if (errors.length) fail(`${label}: console/runtime errors: ${JSON.stringify(errors.slice(0, 3))}`);
   if (thirdPartyRequests.length) fail(`${label}: third-party page-load requests: ${thirdPartyRequests.join(", ")}`);
   return { label, screenshotPath, result };
@@ -593,6 +591,7 @@ async function smokeAtlas() {
       const root = document.querySelector("[data-career-atlas]");
       const ledger = root.querySelector(".atlas-ledger");
       return {
+        renderer: root.dataset.renderer,
         pathCount: root.querySelectorAll("[data-atlas-svg] path[data-state]").length,
         buttonCount: root.querySelectorAll("[data-atlas-state-list] button[data-state]").length,
         interfaceVisible: getComputedStyle(root.querySelector(".atlas-interface")).display !== "none",
@@ -602,6 +601,7 @@ async function smokeAtlas() {
       };
     })()`);
     same(overview, {
+      renderer: "svg",
       pathCount: 50,
       buttonCount: 14,
       interfaceVisible: true,
@@ -616,6 +616,35 @@ async function smokeAtlas() {
     await waitForExpression(desktop.page, `document.querySelector("[data-career-atlas]")?.dataset.year === "2022"`, "atlas 2022 selection");
     const stateCodes = await evaluate(desktop.page, `[...document.querySelectorAll("[data-atlas-state-list] button[data-state]")].map((button) => button.dataset.state)`);
     same(stateCodes, ["AZ", "KS", "MT", "NE", "NV", "OR", "WA"], "atlas 2022 state list");
+    await waitForExpression(desktop.page,
+      `getComputedStyle(document.querySelector('[data-atlas-svg] path[data-state="GA"]')).opacity === "0.2"`,
+      "atlas filtered-state transition");
+    const filteredState = await evaluate(desktop.page, `(() => {
+      const path = document.querySelector('[data-atlas-svg] path[data-state="GA"]');
+      const style = getComputedStyle(path);
+      return {
+        filtered: path.classList.contains("is-filtered-out"),
+        pointerEvents: style.pointerEvents,
+        opacity: style.opacity,
+      };
+    })()`);
+    same(filteredState, { filtered: true, pointerEvents: "none", opacity: "0.2" },
+      "atlas filtered states have no dead interaction affordance");
+    await evaluate(desktop.page, `document.querySelector('[data-atlas-svg] path[data-state="OR"]').dispatchEvent(new PointerEvent("pointerover", { bubbles: true })); true`);
+    await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon hover preview");
+    const hover = await evaluate(desktop.page, `(() => {
+      const caseFile = document.querySelector("[data-atlas-case]");
+      return {
+        preview: caseFile.classList.contains("is-preview"),
+        header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
+        pressed: document.querySelectorAll('[data-atlas-state-list] button[aria-pressed="true"]').length,
+        hash: location.hash,
+      };
+    })()`);
+    same(hover, { preview: true, header: "Oregon", pressed: 0, hash: "#career-2022" }, "atlas Oregon hover preview remains unpinned");
+    paths.desktopOregonHover = await capture(desktop.page, "sh-patterson-atlas-desktop-oregon-hover.png");
+    await evaluate(desktop.page, `document.querySelector('[data-atlas-svg] path[data-state="OR"]').dispatchEvent(new PointerEvent("pointerout", { bubbles: true })); true`);
+    await waitForExpression(desktop.page, `!document.querySelector("[data-atlas-case]")?.matches(":popover-open") && !document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon hover dismissal");
     await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
     await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon case open");
     const oregon = await evaluate(desktop.page, `(() => {
@@ -624,16 +653,16 @@ async function smokeAtlas() {
       return {
         header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
         recordCount: caseFile.querySelectorAll(".case-record").length,
-        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^State evidence:\\s*/, "").trim(),
+        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^Result:\\s*/, "").trim(),
         receiptLabel: caseFile.querySelector(".receipt-label")?.textContent.trim(),
         hash: location.hash,
       };
     })()`);
     same(oregon, {
-      header: "Oregon / 2022",
+      header: "Oregon",
       recordCount: 1,
       evidence: "3 assignments: OR-04, OR-05, OR-06. 2 wins, 1 loss.",
-      receiptLabel: "Cycle Receipt",
+      receiptLabel: "Cycle context",
       hash: "#career-2022-or",
     }, "atlas Oregon evidence");
     await assertAtlasNoOverflow(desktop.page, "atlas desktop with case file");
@@ -665,14 +694,14 @@ async function smokeAtlas() {
       return {
         recordCount: caseFile.querySelectorAll(".case-record").length,
         header: caseFile.querySelector(".case-header h3")?.textContent.trim(),
-        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^State evidence:\\s*/, "").trim(),
+        evidence: caseFile.querySelector(".case-evidence")?.textContent.replace(/^Result:\\s*/, "").trim(),
         receiptLabel: caseFile.querySelector(".receipt-label")?.textContent.trim(),
         text: caseFile.textContent.replace(/\\s+/g, " ").trim(),
       };
     })()`);
-    check(arizona.recordCount === 1 && arizona.header === "Arizona / 2022", "atlas Arizona must contain only its 2022 coverage record");
+    check(arizona.recordCount === 1 && arizona.header === "Arizona", "atlas Arizona must contain only its 2022 coverage record");
     check(arizona.evidence === "Arizona was a coverage assignment only. No electoral result claim is made.", "atlas Arizona must make no result claim");
-    check(arizona.receiptLabel === "Cycle Receipt · cycle context, not a state result", "atlas Arizona must contextualize its cycle receipt");
+    check(arizona.receiptLabel === "Cycle context · cycle context, not a state result", "atlas Arizona must contextualize its cycle receipt");
     check(!/won|lost|loss|victory/i.test(arizona.evidence), "atlas Arizona evidence contains a result claim");
     await closeAtlasPage(desktop);
 
@@ -769,30 +798,33 @@ async function smokeAtlas() {
     `atlas reduced motion did not disable map transitions: ${JSON.stringify(reducedResult)}`);
     await closeAtlasPage(reduced);
 
-    const forcedFailure = await openAtlasPage(baseUrl, chromePort, "atlas forced WebGL failure", {
+    const svgOnly = await openAtlasPage(baseUrl, chromePort, "atlas SVG-only renderer", {
       preload: `(() => {
-        Object.defineProperty(window, "WebGL2RenderingContext", { configurable: true, value: function WebGL2RenderingContext() {} });
-        Object.defineProperty(navigator, "hardwareConcurrency", { configurable: true, get: () => 8 });
-        Object.defineProperty(navigator, "deviceMemory", { configurable: true, get: () => 8 });
+        window.__qaWebglRequests = 0;
         const original = HTMLCanvasElement.prototype.getContext;
         HTMLCanvasElement.prototype.getContext = function(type, ...args) {
-          if (type === "webgl2") return null;
+          if (type === "webgl2") {
+            window.__qaWebglRequests += 1;
+            throw new Error("Unexpected WebGL2 allocation");
+          }
           return original.call(this, type, ...args);
         };
       })();`,
     });
-    await scrollToAtlas(forcedFailure.page, forcedFailure.label);
-    const failureResult = await evaluate(forcedFailure.page, `(() => {
+    await scrollToAtlas(svgOnly.page, svgOnly.label);
+    const svgOnlyResult = await evaluate(svgOnly.page, `(() => {
       const root = document.querySelector("[data-career-atlas]");
       return {
         renderer: root.dataset.renderer,
         paths: root.querySelectorAll("[data-atlas-svg] path[data-state]").length,
         webglDisplay: getComputedStyle(root.querySelector("[data-atlas-webgl]")).display,
-        errors: window.__atlasQaErrors,
+        webglRequests: window.__qaWebglRequests,
       };
     })()`);
-    check(failureResult.renderer === "svg" && failureResult.paths === 50 && failureResult.webglDisplay === "none", "atlas WebGL failure did not retain a clean SVG fallback");
-    await closeAtlasPage(forcedFailure, { atlasError: /WebGL2 is unavailable/ });
+    same(svgOnlyResult,
+      { renderer: "svg", paths: 50, webglDisplay: "none", webglRequests: 0 },
+      "atlas does not allocate the hidden WebGL renderer");
+    await closeAtlasPage(svgOnly);
 
     const mobile = await openAtlasPage(baseUrl, chromePort, "atlas mobile", {
       metrics: { width: 390, height: 844, deviceScaleFactor: 2, mobile: true },
@@ -810,6 +842,8 @@ async function smokeAtlas() {
     const ledgerOpenBeforePrint = await evaluate(print.page,
       `document.querySelector(".atlas-ledger").open`);
     await print.page.send("Emulation.setEmulatedMedia", { media: "print" });
+    await waitForExpression(print.page, `window.matchMedia("print").matches`,
+      "atlas print media active");
     await evaluate(print.page, `window.dispatchEvent(new Event("beforeprint")); true`);
     const printResult = await evaluate(print.page, `(() => {
       const root = document.querySelector("[data-career-atlas]");
@@ -841,6 +875,10 @@ async function smokeAtlas() {
       `atlas print media did not keep all six ledger records visible: ${JSON.stringify(printResult.recordDisplays)}`);
     await evaluate(print.page, `window.dispatchEvent(new Event("afterprint")); true`);
     await print.page.send("Emulation.setEmulatedMedia", { media: "screen" });
+    await waitForExpression(print.page, `!window.matchMedia("print").matches`,
+      "atlas print media reset");
+    await waitForExpression(print.page, `document.querySelector(".atlas-ledger").open === ${ledgerOpenBeforePrint}`,
+      "atlas print ledger restored");
     const ledgerOpenAfterPrint = await evaluate(print.page,
       `document.querySelector(".atlas-ledger").open`);
     check(ledgerOpenAfterPrint === ledgerOpenBeforePrint,
@@ -1017,26 +1055,27 @@ async function visualAudit() {
     await scrollToAtlas(forced.page, forced.label);
     const forcedResult = await evaluate(forced.page, `(() => {
       const selected = getComputedStyle(document.querySelector(".atlas-year-options input:checked + span"));
-      const multi = getComputedStyle(document.querySelector(".legend-multi"));
-      const assignment = getComputedStyle(document.querySelector(".legend-active"));
-      const coverage = getComputedStyle(document.querySelector(".legend-coverage"));
+      const active = getComputedStyle(document.querySelector(".atlas-state.is-active"));
+      const context = getComputedStyle(document.querySelector(".atlas-state:not(.is-active)"));
       return {
         selectedBackground: selected.backgroundColor,
         selectedColor: selected.color,
         selectedOutlineWidth: selected.outlineWidth,
-        multiDisplay: multi.display,
-        multiBorderStyle: multi.borderStyle,
-        assignmentDisplay: assignment.display,
-        coverageDisplay: coverage.display,
+        selectedOutlineStyle: selected.outlineStyle,
+        selectedOutlineColor: selected.outlineColor,
+        activeFill: active.fill,
+        contextFill: context.fill,
+        activeStroke: active.stroke,
+        contextStroke: context.stroke,
       };
     })()`);
-    check(forcedResult.selectedBackground !== "rgba(0, 0, 0, 0)" &&
-      forcedResult.selectedBackground !== forcedResult.selectedColor &&
-      Number.parseFloat(forcedResult.selectedOutlineWidth) >= 3,
+    check(Number.parseFloat(forcedResult.selectedOutlineWidth) >= 3 &&
+      forcedResult.selectedOutlineStyle !== "none" &&
+      forcedResult.selectedOutlineColor !== "rgba(0, 0, 0, 0)",
     "forced-colors cycle selection is not visually explicit: " + JSON.stringify(forcedResult));
-    check(forcedResult.multiDisplay !== "none" && forcedResult.multiBorderStyle === "double" &&
-      forcedResult.assignmentDisplay !== "none" && forcedResult.coverageDisplay !== "none",
-    "forced-colors legend keys are incomplete: " + JSON.stringify(forcedResult));
+    check(forcedResult.activeFill !== forcedResult.contextFill &&
+      forcedResult.activeStroke !== "none" && forcedResult.contextStroke !== "none",
+    "forced-colors state contrast is incomplete: " + JSON.stringify(forcedResult));
     await snap(forced.page, "forced-colors-overview", { group: "preferences", state: "forced-colors", viewport: "1440x1100" });
     await closeAtlasPage(forced);
 
@@ -1050,6 +1089,23 @@ async function visualAudit() {
     const noJs = await openAtlasPage(baseUrl, chromePort, "visual no-JS", { scriptDisabled: true });
     await snap(noJs.page, "no-js-full-ledger", { group: "fallbacks", state: "no-js", viewport: "1440x1100", fullPage: true }, { fullPage: true });
     await closeAtlasPage(noJs, { scriptDisabled: true });
+
+    const sourceMatch = await openAtlasPage(baseUrl, chromePort, "visual source-match", {
+      metrics: { width: 1600, height: 1003, deviceScaleFactor: 1, mobile: false },
+    });
+    await snap(sourceMatch.page, "source-match-hero",
+      { group: "comparison", state: "hero", viewport: "1600x1003" });
+    await closeAtlasPage(sourceMatch);
+
+    const hover = await openAtlasPage(baseUrl, chromePort, "visual hover");
+    await scrollToAtlas(hover.page, hover.label);
+    await selectVisualYear(hover.page, "2022", hover.label);
+    await evaluate(hover.page, `document.querySelector('[data-atlas-svg] path[data-state="OR"]').dispatchEvent(new PointerEvent("pointerover", { bubbles: true })); true`);
+    await waitForExpression(hover.page,
+      `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`,
+      "visual Oregon hover preview");
+    await snap(hover.page, "desktop-hover-2022-or", { group: "hover", state: "2022-OR", viewport: "1440x1100" });
+    await closeAtlasPage(hover);
   });
 
   const manifestPath = path.join(outputDir, "manifest.json");

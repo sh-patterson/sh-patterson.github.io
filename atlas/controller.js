@@ -131,6 +131,7 @@ export const CareerAtlas = Object.freeze({
     let rendererMode = "svg";
     let lastInvoker = null;
     let focusRestoreRequested = false;
+    let suppressFocusPreview = false;
     let destroyed = false;
     let reduceEffects = reducedValue(options.reducedMotion) || storageRead();
     const printMedia = window.matchMedia?.("print") ?? null;
@@ -145,6 +146,7 @@ export const CareerAtlas = Object.freeze({
     const initial = parseHash(window.location.hash, years, activeByYear);
     let currentYear = initial.year;
     let selectedState = initial.selectedState;
+    let previewState = null;
 
     function reportError(error) {
       const detail = { error: error instanceof Error ? error : new Error(String(error)) };
@@ -174,14 +176,16 @@ export const CareerAtlas = Object.freeze({
     function presentation() {
       const active = new Map();
       for (const { code } of geometry.states) {
-        const records = matchingRecords(currentYear, code);
+        const records = matchingRecords("Overview", code);
         if (!records.length) continue;
         const recordYears = [...new Set(records.map(({ year }) => year))].sort((a, b) => Number(a) - Number(b));
         const coverageOnly = records.every((record) => COVERAGE_TYPES.has(record.scopeType));
+        const inFilter = currentYear === "Overview" || records.some((record) => record.year === currentYear);
         active.set(code, {
           year: recordYears.join("-"),
           years: recordYears,
-          scope: currentYear === "Overview" && recordYears.length > 1
+          inFilter,
+          scope: recordYears.length > 1
             ? "multi-year"
             : coverageOnly ? "coverage" : "assignment",
         });
@@ -190,7 +194,7 @@ export const CareerAtlas = Object.freeze({
     }
 
     function positionAnchor() {
-      const selected = stateGeometry.get(selectedState);
+      const selected = stateGeometry.get(previewState ?? selectedState);
       if (!selected) {
         anchor.hidden = true;
         return;
@@ -243,8 +247,8 @@ export const CareerAtlas = Object.freeze({
       const heading = node(document, "h4", "case-record-title", `${record.organization} / ${record.role}`);
       const meta = node(document, "p", "case-record-meta", `${record.year} · ${record.campaign}`);
       article.append(heading, meta);
-      appendLabeledText(document, article, "Scope: ", record.summary);
-      appendLabeledText(document, article, "State evidence: ", stateEvidence(record, code), "case-line case-evidence");
+      article.append(node(document, "p", "case-line case-summary", record.summary));
+      appendLabeledText(document, article, "Result: ", stateEvidence(record, code), "case-line case-evidence");
       if (record.roster?.length && record.id !== "2022-dccc-rocky-mountains") {
         const stateRoster = record.roster.filter((assignment) => stateCode(assignment) === code);
         if (stateRoster.length) appendLabeledText(document, article, "Assignments: ", stateRoster.join(", "));
@@ -253,7 +257,7 @@ export const CareerAtlas = Object.freeze({
       const dsccContext = record.id === "2020-dscc-senate-portfolio" && code !== "GA";
       if (receipt) {
         const proof = node(document, "blockquote", "case-receipt");
-        const label = receipt.kind === "cycle-receipt" ? "Cycle Receipt" : "Receipt";
+        const label = receipt.kind === "cycle-receipt" ? "Cycle context" : "Result";
         const contextLabel = dsccContext
           ? `${label} · Georgia context, not a result in ${stateNames.get(code)}`
           : contextual ? `${label} · cycle context, not a state result` : label;
@@ -272,14 +276,19 @@ export const CareerAtlas = Object.freeze({
     function renderCase(code) {
       caseContent.replaceChildren();
       const name = stateNames.get(code);
+      const records = matchingRecords(currentYear, code);
+      const recordYears = [...new Set(records.map(({ year }) => year))].join(" · ");
       const header = node(document, "header", "case-header");
-      header.append(node(document, "p", "case-kicker", "Case file"), node(document, "h3", "", `${name} / ${currentYear}`));
+      header.append(node(document, "h3", "", name), node(document, "p", "case-kicker", recordYears));
       caseContent.append(header);
-      for (const record of matchingRecords(currentYear, code)) caseContent.append(caseRecord(record, code));
+      for (const record of records) caseContent.append(caseRecord(record, code));
     }
 
     function restoreInvoker() {
-      if (lastInvoker?.isConnected) lastInvoker.focus({ preventScroll: true });
+      if (!lastInvoker?.isConnected) return;
+      suppressFocusPreview = true;
+      lastInvoker.focus({ preventScroll: true });
+      queueMicrotask(() => { suppressFocusPreview = false; });
     }
 
     function dismissCase({ restoreFocus = false } = {}) {
@@ -305,7 +314,9 @@ export const CareerAtlas = Object.freeze({
     }
 
     function renderStateList(activeStates) {
-      const active = [...activeStates.keys()].sort((a, b) => stateNames.get(a).localeCompare(stateNames.get(b)));
+      const active = [...activeStates.entries()]
+        .filter(([, detail]) => detail.inFilter !== false)
+        .map(([code]) => code).sort((a, b) => stateNames.get(a).localeCompare(stateNames.get(b)));
       stateList.replaceChildren();
       count.textContent = `${active.length} ${active.length === 1 ? "state" : "states"}`;
       for (const code of active) {
@@ -339,7 +350,7 @@ export const CareerAtlas = Object.freeze({
         else updateStateSelection();
         renderer.render({
           activeStates,
-          selectedState,
+          selectedState: previewState ?? selectedState,
           transition: { year: currentYear, resolve: reduceEffects ? 1 : transition ? 0 : 1 },
         });
         positionAnchor();
@@ -348,9 +359,26 @@ export const CareerAtlas = Object.freeze({
       else work();
     }
 
+    function clearSelection({ restoreFocus = false, passive = false } = {}) {
+      const previous = selectedState;
+      previewState = null;
+      selectedState = null;
+      render();
+      dismissCase({ restoreFocus });
+      if (!passive) updateUrl();
+      emit(root, "statechange", { year: currentYear, state: null, passive });
+      return Boolean(previous);
+    }
+
     function selectState(code, invoker = null, { passive = false } = {}) {
       const normalized = String(code || "").toUpperCase();
       if (!activeByYear(currentYear).has(normalized)) return false;
+      if (selectedState === normalized && !passive) {
+        clearSelection({ restoreFocus: false });
+        return true;
+      }
+      previewState = null;
+      caseFile.classList.remove("is-preview");
       selectedState = normalized;
       lastInvoker = invoker ?? stateList.querySelector(`[data-state="${normalized}"]`) ?? lastInvoker;
       render({ transition: !passive });
@@ -365,6 +393,7 @@ export const CareerAtlas = Object.freeze({
       const normalized = String(year);
       if (!years.includes(normalized)) return false;
       const yearChanged = normalized !== currentYear;
+      previewState = null;
       currentYear = normalized;
       if (selectedState && !activeByYear(currentYear).has(selectedState)) {
         selectedState = null;
@@ -387,9 +416,55 @@ export const CareerAtlas = Object.freeze({
       if (button && stateList.contains(button)) selectState(button.dataset.state, button);
     }
 
+    function previewStateSelection(code) {
+      const normalized = String(code || "").toUpperCase();
+      if (!activeByYear(currentYear).has(normalized)) return false;
+      previewState = normalized;
+      caseFile.classList.add("is-preview");
+      render();
+      renderCase(normalized);
+      showCase();
+      return true;
+    }
+
+    function clearPreview() {
+      if (!previewState) return;
+      previewState = null;
+      caseFile.classList.remove("is-preview");
+      render();
+      if (selectedState) {
+        renderCase(selectedState);
+        showCase();
+      } else {
+        dismissCase({ restoreFocus: false });
+      }
+    }
+
+    function onStateFocusIn(event) {
+      if (suppressFocusPreview) return;
+      const button = event.target.closest("button[data-state]");
+      if (button && stateList.contains(button)) previewStateSelection(button.dataset.state);
+    }
+
+    function onStateFocusOut(event) {
+      if (!stateList.contains(event.relatedTarget)) clearPreview();
+    }
+
+    function onMapPointerOver(event) {
+      const path = event.target.closest("path[data-state]");
+      if (path && svg.contains(path)) previewStateSelection(path.dataset.state);
+    }
+
+    function onMapPointerOut(event) {
+      const path = event.target.closest("path[data-state]");
+      if (!path || !svg.contains(path)) return;
+      const next = event.relatedTarget?.closest?.("path[data-state]");
+      if (!next || next !== path) clearPreview();
+    }
+
     function onMapClick(event) {
       const path = event.target.closest("path[data-state]");
-      if (!path || !svg.contains(path) || !presentation().has(path.dataset.state)) return;
+      if (!path || !svg.contains(path) || !activeByYear(currentYear).has(path.dataset.state)) return;
       const invoker = stateList.querySelector(`[data-state="${path.dataset.state}"]`);
       selectState(path.dataset.state, invoker);
     }
@@ -412,13 +487,14 @@ export const CareerAtlas = Object.freeze({
     function onHashChange() {
       const next = parseHash(window.location.hash, years, activeByYear);
       selectedState = null;
+      previewState = null;
       dismissCase({ restoreFocus: false });
       setYear(next.year, { passive: true });
       if (next.selectedState) selectState(next.selectedState, null, { passive: true });
     }
 
     function onClose() {
-      dismissCase({ restoreFocus: true });
+      clearSelection({ restoreFocus: true });
     }
 
     function onCaseKeydown(event) {
@@ -427,7 +503,7 @@ export const CareerAtlas = Object.freeze({
         : caseFile.classList.contains("is-open");
       if (event.key !== "Escape" || !open) return;
       event.preventDefault();
-      dismissCase({ restoreFocus: true });
+      clearSelection({ restoreFocus: true });
     }
 
     function enterPrintMode() {
@@ -460,7 +536,11 @@ export const CareerAtlas = Object.freeze({
     }
     root.addEventListener("change", onYearChange);
     stateList.addEventListener("click", onStateClick);
+    stateList.addEventListener("focusin", onStateFocusIn);
+    stateList.addEventListener("focusout", onStateFocusOut);
     svg.addEventListener("click", onMapClick);
+    svg.addEventListener("pointerover", onMapPointerOver);
+    svg.addEventListener("pointerout", onMapPointerOut);
     effectsControl.addEventListener("change", onEffectsChange);
     closeButton?.addEventListener("click", onClose);
     document.addEventListener("keydown", onCaseKeydown);
@@ -471,7 +551,11 @@ export const CareerAtlas = Object.freeze({
     cleanup.push(
       () => root.removeEventListener("change", onYearChange),
       () => stateList.removeEventListener("click", onStateClick),
+      () => stateList.removeEventListener("focusin", onStateFocusIn),
+      () => stateList.removeEventListener("focusout", onStateFocusOut),
       () => svg.removeEventListener("click", onMapClick),
+      () => svg.removeEventListener("pointerover", onMapPointerOver),
+      () => svg.removeEventListener("pointerout", onMapPointerOut),
       () => effectsControl.removeEventListener("change", onEffectsChange),
       () => closeButton?.removeEventListener("click", onClose),
       () => document.removeEventListener("keydown", onCaseKeydown),
