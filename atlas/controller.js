@@ -133,6 +133,8 @@ export const CareerAtlas = Object.freeze({
     let focusRestoreRequested = false;
     let destroyed = false;
     let reduceEffects = reducedValue(options.reducedMotion) || storageRead();
+    const printMedia = window.matchMedia?.("print") ?? null;
+    let ledgerOpenBeforePrint = null;
 
     const matchingRecords = (year, code) => data.records.filter((record) =>
       (year === "Overview" || record.year === year) && recordMatchesState(record, code)
@@ -428,6 +430,23 @@ export const CareerAtlas = Object.freeze({
       dismissCase({ restoreFocus: true });
     }
 
+    function enterPrintMode() {
+      if (!ledger) return;
+      if (ledgerOpenBeforePrint === null) ledgerOpenBeforePrint = ledger.open;
+      ledger.open = true;
+    }
+
+    function exitPrintMode() {
+      if (!ledger || ledgerOpenBeforePrint === null) return;
+      ledger.open = ledgerOpenBeforePrint;
+      ledgerOpenBeforePrint = null;
+    }
+
+    function onPrintMediaChange(event) {
+      if (event.matches) enterPrintMode();
+      else exitPrintMode();
+    }
+
     const patternDefinitions = injectPatterns(svg);
     effectsControl.checked = reduceEffects;
     root.classList.toggle("atlas-reduced-effects", reduceEffects);
@@ -446,6 +465,9 @@ export const CareerAtlas = Object.freeze({
     closeButton?.addEventListener("click", onClose);
     document.addEventListener("keydown", onCaseKeydown);
     window.addEventListener("hashchange", onHashChange);
+    window.addEventListener("beforeprint", enterPrintMode);
+    window.addEventListener("afterprint", exitPrintMode);
+    printMedia?.addEventListener?.("change", onPrintMediaChange);
     cleanup.push(
       () => root.removeEventListener("change", onYearChange),
       () => stateList.removeEventListener("click", onStateClick),
@@ -454,6 +476,9 @@ export const CareerAtlas = Object.freeze({
       () => closeButton?.removeEventListener("click", onClose),
       () => document.removeEventListener("keydown", onCaseKeydown),
       () => window.removeEventListener("hashchange", onHashChange),
+      () => window.removeEventListener("beforeprint", enterPrintMode),
+      () => window.removeEventListener("afterprint", exitPrintMode),
+      () => printMedia?.removeEventListener?.("change", onPrintMediaChange),
       () => resizeObserver?.disconnect(),
       () => patternDefinitions.remove(),
     );
@@ -498,6 +523,7 @@ export const CareerAtlas = Object.freeze({
     if (selectedState) selectState(selectedState, null, { passive: true });
     root.dataset.mounted = "true";
     if (ledger) ledger.open = false;
+    if (printMedia?.matches) enterPrintMode();
 
     return Object.freeze({
       setYear,
@@ -513,6 +539,7 @@ export const CareerAtlas = Object.freeze({
         renderer?.destroy?.();
         root.removeAttribute("data-mounted");
         root.removeAttribute("data-renderer");
+        ledgerOpenBeforePrint = null;
         if (ledger) ledger.open = true;
       },
     });

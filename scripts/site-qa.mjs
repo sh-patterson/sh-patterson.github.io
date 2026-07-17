@@ -2,7 +2,7 @@
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
-import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -208,6 +208,9 @@ async function launchChrome() {
   const chrome = spawn(findChrome(), [
     "--headless=new",
     "--disable-gpu",
+    "--disable-background-timer-throttling",
+    "--disable-renderer-backgrounding",
+    "--disable-backgrounding-occluded-windows",
     "--no-sandbox",
     `--remote-debugging-port=${port}`,
     `--user-data-dir=${profile}`,
@@ -231,8 +234,10 @@ async function launchChrome() {
 }
 
 class Cdp {
-  constructor(wsUrl) {
+  constructor(wsUrl, chromePort, targetId) {
     this.ws = new WebSocket(wsUrl);
+    this.chromePort = chromePort;
+    this.targetId = targetId;
     this.seq = 0;
     this.pending = new Map();
     this.events = [];
@@ -251,6 +256,11 @@ class Cdp {
         this.events.push(message);
       }
     };
+    this.ws.onclose = () => {
+      const error = new Error("CDP WebSocket closed");
+      for (const pending of this.pending.values()) pending.reject(error);
+      this.pending.clear();
+    };
   }
 
   async send(method, params = {}) {
@@ -262,13 +272,19 @@ class Cdp {
     });
   }
 
-  async waitFor(method, timeout = 8000) {
+  eventCursor() {
+    return this.events.length;
+  }
+
+  async waitFor(method, after, predicate = () => true, timeout = 8000) {
     const start = Date.now();
     while (Date.now() - start < timeout) {
-      if (this.events.some((event) => event.method === method)) return;
+      const event = this.events.slice(after).find((candidate) =>
+        candidate.method === method && predicate(candidate));
+      if (event) return event;
       await new Promise((resolve) => setTimeout(resolve, 50));
     }
-    fail(`Timed out waiting for ${method}`);
+    fail("Timed out waiting for " + method);
   }
 
   close() {
@@ -278,7 +294,36 @@ class Cdp {
 
 async function newPage(chromePort) {
   const target = await fetch(`http://127.0.0.1:${chromePort}/json/new`, { method: "PUT" }).then((response) => response.json());
-  return new Cdp(target.webSocketDebuggerUrl);
+  return new Cdp(target.webSocketDebuggerUrl, chromePort, target.id);
+}
+
+async function navigateAndWait(page, url, label) {
+  const cursor = page.eventCursor();
+  const navigation = await page.send("Page.navigate", { url });
+  if (navigation.errorText) fail(label + ": navigation failed: " + navigation.errorText);
+  if (!navigation.loaderId) fail(label + ": navigation returned no loaderId");
+  await page.waitFor("Page.lifecycleEvent", cursor, (event) =>
+    event.params?.name === "load" && event.params?.loaderId === navigation.loaderId);
+}
+
+async function closePage(page, label, timeout = 4000) {
+  const closeEndpoint = "http://127.0.0.1:" + page.chromePort + "/json/close/" + encodeURIComponent(page.targetId);
+  const closeResponse = await fetch(closeEndpoint, { signal: AbortSignal.timeout(1000) });
+  if (!closeResponse.ok) fail(label + ": target-close request failed with " + closeResponse.status);
+  const deadline = Date.now() + timeout;
+  const endpoint = "http://127.0.0.1:" + page.chromePort + "/json/list";
+  while (Date.now() < deadline) {
+    const response = await fetch(endpoint, { signal: AbortSignal.timeout(1000) });
+    if (!response.ok) fail(label + ": target-list request failed with " + response.status);
+    const targets = await response.json();
+    if (!targets.some((target) => target.id === page.targetId)) {
+      page.close();
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  page.close();
+  fail(label + ": timed out waiting for target " + page.targetId + " to close");
 }
 
 function metricMap(metrics) {
@@ -334,7 +379,13 @@ async function waitForExpression(page, expression, label, timeout = 12000) {
     if (await evaluate(page, expression)) return;
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
-  fail(`${label}: timed out`);
+  fail(label + ": timed out");
+}
+
+async function dispatchTab(page, shift = false) {
+  const modifiers = shift ? 8 : 0;
+  await page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", modifiers });
+  await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", modifiers });
 }
 
 async function capture(page, filename) {
@@ -378,6 +429,8 @@ const atlasEventCapture = `(() => {
 async function openAtlasPage(baseUrl, chromePort, label, options = {}) {
   const page = await newPage(chromePort);
   await page.send("Page.enable");
+  await page.send("Page.setLifecycleEventsEnabled", { enabled: true });
+  await page.send("Page.bringToFront");
   await page.send("Network.enable");
   await page.send("Runtime.enable");
   await page.send("Log.enable");
@@ -394,8 +447,8 @@ async function openAtlasPage(baseUrl, chromePort, label, options = {}) {
       source: `${atlasEventCapture}\n${options.preload ?? ""}`,
     });
   }
-  await page.send("Page.navigate", { url: `${baseUrl}${options.hash ?? ""}` });
-  await page.waitFor("Page.loadEventFired");
+  await navigateAndWait(page, baseUrl + (options.hash ?? ""), label);
+  await page.send("Page.bringToFront");
   if (options.scriptDisabled) {
     await page.send("Emulation.setScriptExecutionDisabled", { value: false });
   }
@@ -416,8 +469,7 @@ async function closeAtlasPage(context, options = {}) {
   } else if (atlasErrors.length) {
     fail(`${label}: unexpected atlas errors: ${JSON.stringify(atlasErrors)}`);
   }
-  await page.send("Page.close").catch(() => {});
-  page.close();
+  await closePage(page, label);
 }
 
 async function scrollToAtlas(page, label) {
@@ -453,12 +505,12 @@ async function assertAtlasNoOverflow(page, label) {
 async function renderCase(baseUrl, chromePort, label, metrics) {
   const page = await newPage(chromePort);
   await page.send("Page.enable");
+  await page.send("Page.setLifecycleEventsEnabled", { enabled: true });
   await page.send("Network.enable");
   await page.send("Runtime.enable");
   await page.send("Log.enable");
   await page.send("Emulation.setDeviceMetricsOverride", metrics);
-  await page.send("Page.navigate", { url: baseUrl });
-  await page.waitFor("Page.loadEventFired");
+  await navigateAndWait(page, baseUrl, label);
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   const expression = `(() => {
@@ -509,8 +561,7 @@ async function renderCase(baseUrl, chromePort, label, metrics) {
         return false;
       }
     });
-  await page.send("Page.close").catch(() => {});
-  page.close();
+  await closePage(page, label);
 
   if (!result.title.includes("Shawn Patterson")) fail(`${label}: wrong page title`);
   if (result.h1 !== "Shawn Patterson") fail(`${label}: missing hero heading`);
@@ -591,6 +642,17 @@ async function smokeAtlas() {
     await desktop.page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
     await desktop.page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
     await waitForExpression(desktop.page, `document.activeElement?.matches('[data-atlas-state-list] button[data-state="OR"]')`, "atlas Escape focus restoration");
+    await dispatchTab(desktop.page);
+    await waitForExpression(desktop.page, `document.activeElement?.dataset.state === "WA"`, "atlas Tab focus advancement");
+    await dispatchTab(desktop.page, true);
+    await waitForExpression(desktop.page, `document.activeElement?.dataset.state === "OR"`, "atlas Shift+Tab focus return");
+    const focusTreatment = await evaluate(desktop.page, `(() => {
+      const style = getComputedStyle(document.activeElement);
+      return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth, outlineColor: style.outlineColor };
+    })()`);
+    check(focusTreatment.outlineStyle === "solid" && Number.parseFloat(focusTreatment.outlineWidth) >= 3 &&
+      focusTreatment.outlineColor !== "rgba(0, 0, 0, 0)",
+    "atlas keyboard focus treatment is not unmistakable: " + JSON.stringify(focusTreatment));
     await evaluate(desktop.page, `document.querySelector('[data-atlas-state-list] button[data-state="OR"]').click(); true`);
     await waitForExpression(desktop.page, `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`, "atlas Oregon reopen");
     await evaluate(desktop.page, `document.querySelector("[data-atlas-close]").click(); true`);
@@ -745,11 +807,22 @@ async function smokeAtlas() {
 
     const print = await openAtlasPage(baseUrl, chromePort, "atlas print");
     await scrollToAtlas(print.page, print.label);
+    const ledgerOpenBeforePrint = await evaluate(print.page,
+      `document.querySelector(".atlas-ledger").open`);
     await print.page.send("Emulation.setEmulatedMedia", { media: "print" });
+    await evaluate(print.page, `window.dispatchEvent(new Event("beforeprint")); true`);
     const printResult = await evaluate(print.page, `(() => {
       const root = document.querySelector("[data-career-atlas]");
+      const heroHeading = document.querySelector(".hero h1");
+      const firstRecord = root.querySelector(".atlas-ledger article[data-career-id]");
       return {
         interfaceHidden: getComputedStyle(root.querySelector(".atlas-interface")).display === "none",
+        ledgerOpen: root.querySelector(".atlas-ledger").open,
+        skipHidden: getComputedStyle(document.querySelector(".skip-link")).display === "none",
+        bodyBackground: getComputedStyle(document.body).backgroundColor,
+        heroColor: getComputedStyle(heroHeading).color,
+        heroShadow: getComputedStyle(heroHeading).textShadow,
+        recordColor: getComputedStyle(firstRecord.querySelector(".record-summary")).color,
         recordDisplays: [...root.querySelectorAll(".atlas-ledger article[data-career-id]")].map((article) => ({
           display: getComputedStyle(article).display,
           height: article.getBoundingClientRect().height,
@@ -757,8 +830,21 @@ async function smokeAtlas() {
       };
     })()`);
     check(printResult.interfaceHidden, "atlas print media did not hide the interactive interface");
+    check(printResult.ledgerOpen, "atlas print media did not open the full career ledger");
+    check(printResult.skipHidden, "atlas print media did not hide the skip link");
+    check(printResult.bodyBackground === "rgb(255, 255, 255)",
+      `atlas print media did not use a white page: ${printResult.bodyBackground}`);
+    check(printResult.heroColor === "rgb(17, 17, 17)" && printResult.recordColor === "rgb(17, 17, 17)",
+      `atlas print media did not use readable ink: hero=${printResult.heroColor}, record=${printResult.recordColor}`);
+    check(printResult.heroShadow === "none", `atlas print media retained a text shadow: ${printResult.heroShadow}`);
     check(printResult.recordDisplays.length === 6 && printResult.recordDisplays.every(({ display, height }) => display !== "none" && height > 0),
       `atlas print media did not keep all six ledger records visible: ${JSON.stringify(printResult.recordDisplays)}`);
+    await evaluate(print.page, `window.dispatchEvent(new Event("afterprint")); true`);
+    await print.page.send("Emulation.setEmulatedMedia", { media: "screen" });
+    const ledgerOpenAfterPrint = await evaluate(print.page,
+      `document.querySelector(".atlas-ledger").open`);
+    check(ledgerOpenAfterPrint === ledgerOpenBeforePrint,
+      `atlas print lifecycle did not restore ledger state: before=${ledgerOpenBeforePrint}, after=${ledgerOpenAfterPrint}`);
     await closeAtlasPage(print);
 
     return paths;
@@ -770,9 +856,212 @@ async function smokeAtlas() {
   console.log(`atlas mobile Oregon screenshot: ${screenshots.mobileOregon}`);
 }
 
+const visualCases = [
+  ["2018", "WV"],
+  ["2020", "GA"], ["2020", "IA"], ["2020", "KS"], ["2020", "MI"], ["2020", "NH"],
+  ["2022", "AZ"], ["2022", "KS"], ["2022", "MT"], ["2022", "NE"],
+  ["2022", "NV"], ["2022", "OR"], ["2022", "WA"],
+  ["2023", "MS"],
+  ["2024", "AZ"],
+  ["2026", "CA"],
+];
+
+async function captureVisual(page, outputDir, filename, metadata, manifest, options = {}) {
+  await new Promise((resolve) => setTimeout(resolve, 700));
+  const screenshotOptions = {
+    format: "png",
+    fromSurface: true,
+    captureBeyondViewport: Boolean(options.fullPage),
+  };
+  if (options.fullPage) {
+    const metrics = await page.send("Page.getLayoutMetrics");
+    screenshotOptions.clip = {
+      x: 0,
+      y: 0,
+      width: Math.ceil(metrics.cssContentSize.width),
+      height: Math.ceil(metrics.cssContentSize.height),
+      scale: 1,
+    };
+  }
+  const screenshot = await page.send("Page.captureScreenshot", screenshotOptions);
+  const screenshotPath = path.join(outputDir, filename);
+  await writeFile(screenshotPath, Buffer.from(screenshot.data, "base64"));
+  manifest.push({
+    step: manifest.length + 1,
+    file: filename,
+    path: screenshotPath,
+    ...metadata,
+  });
+  return screenshotPath;
+}
+
+async function selectVisualYear(page, year, label) {
+  await evaluate(page, `document.querySelector('input[name="career-year"][value="${year}"]').click(); true`);
+  await waitForExpression(page, `document.querySelector("[data-career-atlas]")?.dataset.year === "${year}"`, `${label}: select ${year}`);
+}
+
+async function openVisualCase(page, year, state, label) {
+  await selectVisualYear(page, year, label);
+  await evaluate(page, `document.querySelector('[data-atlas-state-list] button[data-state="${state}"]').click(); true`);
+  await waitForExpression(page,
+    `document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open")`,
+    `${label}: open ${year}-${state}`);
+}
+
+async function closeVisualCase(page, label) {
+  await evaluate(page, `document.querySelector("[data-atlas-close]").click(); true`);
+  await waitForExpression(page,
+    `!(document.querySelector("[data-atlas-case]")?.matches(":popover-open") || document.querySelector("[data-atlas-case]")?.classList.contains("is-open"))`,
+    `${label}: close case`);
+}
+
+async function visualAudit() {
+  const outputDir = process.env.VISUAL_AUDIT_DIR || path.join(tmpdir(), "sh-patterson-visual-audit");
+  await mkdir(outputDir, { recursive: true });
+  const manifest = [];
+  let sequence = 0;
+  const snap = async (page, slug, metadata, options = {}) => {
+    sequence += 1;
+    const filename = `${String(sequence).padStart(2, "0")}-${slug}.png`;
+    return captureVisual(page, outputDir, filename, metadata, manifest, options);
+  };
+
+  await withBrowser(async (baseUrl, chromePort) => {
+    const desktop = await openAtlasPage(baseUrl, chromePort, "visual desktop");
+    await snap(desktop.page, "desktop-hero", { group: "desktop", state: "hero", viewport: "1440x1100" });
+    await scrollToAtlas(desktop.page, desktop.label);
+    await snap(desktop.page, "desktop-overview", { group: "desktop", state: "Overview", viewport: "1440x1100" });
+
+    for (const year of ["2018", "2020", "2022", "2023", "2024", "2026"]) {
+      await selectVisualYear(desktop.page, year, desktop.label);
+      await snap(desktop.page, `desktop-year-${year}`, { group: "years", state: year, viewport: "1440x1100" });
+    }
+
+    for (const [year, state] of visualCases) {
+      await openVisualCase(desktop.page, year, state, desktop.label);
+      await snap(desktop.page, `desktop-case-${year}-${state.toLowerCase()}`, {
+        group: "cases",
+        state: `${year}-${state}`,
+        viewport: "1440x1100",
+      });
+      await closeVisualCase(desktop.page, desktop.label);
+    }
+
+    await openVisualCase(desktop.page, "2022", "OR", desktop.label);
+    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape" });
+    await desktop.page.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape" });
+    await waitForExpression(desktop.page, `document.activeElement?.dataset.state === "OR"`, "visual Escape focus restoration");
+    await dispatchTab(desktop.page);
+    await waitForExpression(desktop.page, `document.activeElement?.dataset.state === "WA"`, "visual Tab focus advancement");
+    await dispatchTab(desktop.page, true);
+    await waitForExpression(desktop.page, `document.activeElement?.dataset.state === "OR"`, "visual Shift+Tab focus return");
+    await snap(desktop.page, "desktop-keyboard-focus-or", { group: "focus", state: "2022-OR", viewport: "1440x1100" });
+
+    await selectVisualYear(desktop.page, "Overview", desktop.label);
+    await evaluate(desktop.page, `(() => {
+      const ledger = document.querySelector(".atlas-ledger");
+      ledger.open = true;
+      ledger.scrollIntoView({ block: "start" });
+      return true;
+    })()`);
+    await snap(desktop.page, "desktop-full-ledger", { group: "ledger", state: "open", viewport: "1440x1100", fullPage: true }, { fullPage: true });
+    await closeAtlasPage(desktop);
+
+    const tablet = await openAtlasPage(baseUrl, chromePort, "visual tablet", {
+      metrics: { width: 768, height: 1024, deviceScaleFactor: 1, mobile: false },
+    });
+    await scrollToAtlas(tablet.page, tablet.label);
+    await snap(tablet.page, "tablet-overview", { group: "responsive", state: "Overview", viewport: "768x1024" });
+    await openVisualCase(tablet.page, "2022", "OR", tablet.label);
+    await snap(tablet.page, "tablet-case-2022-or", { group: "responsive", state: "2022-OR", viewport: "768x1024" });
+    await closeAtlasPage(tablet);
+
+    const mobile = await openAtlasPage(baseUrl, chromePort, "visual mobile", {
+      metrics: { width: 390, height: 844, deviceScaleFactor: 2, mobile: true },
+    });
+    await scrollToAtlas(mobile.page, mobile.label);
+    await snap(mobile.page, "mobile-overview", { group: "responsive", state: "Overview", viewport: "390x844" });
+    await selectVisualYear(mobile.page, "2022", mobile.label);
+    await snap(mobile.page, "mobile-year-2022", { group: "responsive", state: "2022", viewport: "390x844" });
+    await openVisualCase(mobile.page, "2022", "OR", mobile.label);
+    await snap(mobile.page, "mobile-case-2022-or", { group: "responsive", state: "2022-OR", viewport: "390x844" });
+    await closeVisualCase(mobile.page, mobile.label);
+    await evaluate(mobile.page, `(() => {
+      const ledger = document.querySelector(".atlas-ledger");
+      ledger.open = true;
+      ledger.scrollIntoView({ block: "start" });
+      return true;
+    })()`);
+    await snap(mobile.page, "mobile-ledger", { group: "responsive", state: "ledger-open", viewport: "390x844" });
+    await closeAtlasPage(mobile);
+
+    const small = await openAtlasPage(baseUrl, chromePort, "visual small mobile", {
+      metrics: { width: 320, height: 568, deviceScaleFactor: 2, mobile: true },
+    });
+    await scrollToAtlas(small.page, small.label);
+    await snap(small.page, "small-mobile-overview", { group: "responsive", state: "Overview", viewport: "320x568" });
+    await openVisualCase(small.page, "2022", "OR", small.label);
+    await snap(small.page, "small-mobile-case-2022-or", { group: "responsive", state: "2022-OR", viewport: "320x568" });
+    await closeAtlasPage(small);
+
+    const reduced = await openAtlasPage(baseUrl, chromePort, "visual reduced motion", {
+      media: { features: [{ name: "prefers-reduced-motion", value: "reduce" }] },
+    });
+    await scrollToAtlas(reduced.page, reduced.label);
+    await snap(reduced.page, "reduced-motion-overview", { group: "preferences", state: "reduced-motion", viewport: "1440x1100" });
+    await closeAtlasPage(reduced);
+
+    const forced = await openAtlasPage(baseUrl, chromePort, "visual forced colors", {
+      media: { features: [{ name: "forced-colors", value: "active" }] },
+    });
+    await scrollToAtlas(forced.page, forced.label);
+    const forcedResult = await evaluate(forced.page, `(() => {
+      const selected = getComputedStyle(document.querySelector(".atlas-year-options input:checked + span"));
+      const multi = getComputedStyle(document.querySelector(".legend-multi"));
+      const assignment = getComputedStyle(document.querySelector(".legend-active"));
+      const coverage = getComputedStyle(document.querySelector(".legend-coverage"));
+      return {
+        selectedBackground: selected.backgroundColor,
+        selectedColor: selected.color,
+        selectedOutlineWidth: selected.outlineWidth,
+        multiDisplay: multi.display,
+        multiBorderStyle: multi.borderStyle,
+        assignmentDisplay: assignment.display,
+        coverageDisplay: coverage.display,
+      };
+    })()`);
+    check(forcedResult.selectedBackground !== "rgba(0, 0, 0, 0)" &&
+      forcedResult.selectedBackground !== forcedResult.selectedColor &&
+      Number.parseFloat(forcedResult.selectedOutlineWidth) >= 3,
+    "forced-colors cycle selection is not visually explicit: " + JSON.stringify(forcedResult));
+    check(forcedResult.multiDisplay !== "none" && forcedResult.multiBorderStyle === "double" &&
+      forcedResult.assignmentDisplay !== "none" && forcedResult.coverageDisplay !== "none",
+    "forced-colors legend keys are incomplete: " + JSON.stringify(forcedResult));
+    await snap(forced.page, "forced-colors-overview", { group: "preferences", state: "forced-colors", viewport: "1440x1100" });
+    await closeAtlasPage(forced);
+
+    const print = await openAtlasPage(baseUrl, chromePort, "visual print");
+    await scrollToAtlas(print.page, print.label);
+    await print.page.send("Emulation.setEmulatedMedia", { media: "print" });
+    await evaluate(print.page, `window.dispatchEvent(new Event("beforeprint")); true`);
+    await snap(print.page, "print-full-ledger", { group: "print", state: "print", viewport: "1440x1100", fullPage: true }, { fullPage: true });
+    await closeAtlasPage(print);
+
+    const noJs = await openAtlasPage(baseUrl, chromePort, "visual no-JS", { scriptDisabled: true });
+    await snap(noJs.page, "no-js-full-ledger", { group: "fallbacks", state: "no-js", viewport: "1440x1100", fullPage: true }, { fullPage: true });
+    await closeAtlasPage(noJs, { scriptDisabled: true });
+  });
+
+  const manifestPath = path.join(outputDir, "manifest.json");
+  const manifestPayload = { outputDir, count: manifest.length, manifestPath, screenshots: manifest };
+  await writeFile(manifestPath, `${JSON.stringify(manifestPayload, null, 2)}\n`);
+  console.log(JSON.stringify(manifestPayload, null, 2));
+}
+
 async function benchCase(baseUrl, chromePort, label, metrics, options = {}) {
   const page = await newPage(chromePort);
   await page.send("Page.enable");
+  await page.send("Page.setLifecycleEventsEnabled", { enabled: true });
   await page.send("Runtime.enable");
   await page.send("Performance.enable");
   await page.send("Emulation.setDeviceMetricsOverride", metrics);
@@ -794,8 +1083,7 @@ async function benchCase(baseUrl, chromePort, label, metrics, options = {}) {
       };
     })();`,
   });
-  await page.send("Page.navigate", { url: baseUrl });
-  await page.waitFor("Page.loadEventFired");
+  await navigateAndWait(page, baseUrl, label);
   await new Promise((resolve) => setTimeout(resolve, 1000));
   const warmupRaf = (await page.send("Runtime.evaluate", {
     expression: "window.__qaRaf",
@@ -812,8 +1100,7 @@ async function benchCase(baseUrl, chromePort, label, metrics, options = {}) {
     returnByValue: true,
   })).result.value;
 
-  await page.send("Page.close").catch(() => {});
-  page.close();
+  await closePage(page, label);
 
   const result = {
     label,
@@ -849,6 +1136,7 @@ try {
   if (command === "links") await checkLinks();
   else if (command === "render") await smokeRender();
   else if (command === "atlas") await smokeAtlas();
+  else if (command === "visual") await visualAudit();
   else if (command === "bench") await benchCanvas();
   else if (command === "all") {
     await checkLinks();
