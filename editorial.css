@@ -313,6 +313,28 @@ summary:focus-visible {
   color: #cbbfac;
 }
 
+.attention-footnote {
+  max-width: 62ch;
+  margin: 1.5rem 0 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgba(245, 239, 226, 0.24);
+  color: #a99e8d;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.attention-footnote span {
+  padding-right: 0.25rem;
+  font-family: var(--font-serif);
+}
+
+.attention-footnote a {
+  color: #d7cbb8;
+  text-decoration-color: rgba(215, 203, 184, 0.5);
+  text-underline-offset: 0.2em;
+}
+
 .attention-section .text-link {
   color: var(--paper);
 }

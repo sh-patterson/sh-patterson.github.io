@@ -101,7 +101,11 @@ Campaign work is full of surprises, and everything takes longer than anyone expe
 
 ## Outside work
 
-I also write about paintings. Usually about obsession, labor, and what happens when you look at something for a long time.
+I spend a lot of time looking at art.
+
+I’m often at the National Gallery, and I still think about visits to the Louvre, the V&A, and Vienna’s Kunsthistorisches Museum. Next up is the Met for Giacometti in the Temple of Dendur. I’m hoping 2027 is the year I make it to the Prado.
+
+*I occasionally write about paintings, too. [“Staring at Saint Jerome”](https://sh-patterson.github.io/writing/staring-at-saint-jerome/) is one example.*
 
 ## Contact
 

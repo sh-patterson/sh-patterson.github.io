@@ -1020,6 +1020,8 @@ async function visualAudit() {
       return true;
     })()`);
     await snap(desktop.page, "desktop-full-ledger", { group: "ledger", state: "open", viewport: "1440x1100", fullPage: true }, { fullPage: true });
+    await evaluate(desktop.page, `document.querySelector(".attention-section").scrollIntoView({ block: "center" }); true`);
+    await snap(desktop.page, "desktop-outside-work", { group: "personal", state: "outside-work", viewport: "1440x1100" });
     await closeAtlasPage(desktop);
 
     const tablet = await openAtlasPage(baseUrl, chromePort, "visual tablet", {
@@ -1048,6 +1050,8 @@ async function visualAudit() {
       return true;
     })()`);
     await snap(mobile.page, "mobile-ledger", { group: "responsive", state: "ledger-open", viewport: "390x844" });
+    await evaluate(mobile.page, `document.querySelector(".attention-section").scrollIntoView({ block: "center" }); true`);
+    await snap(mobile.page, "mobile-outside-work", { group: "personal", state: "outside-work", viewport: "390x844" });
     await closeAtlasPage(mobile);
 
     const small = await openAtlasPage(baseUrl, chromePort, "visual small mobile", {
